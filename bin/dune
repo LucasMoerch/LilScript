@@ -1,4 +1,5 @@
 (executable
- (public_name P4)
  (name main)
- (libraries P4))
+ (public_name ourlangc)
+ (modules main)
+ (libraries ourlang))

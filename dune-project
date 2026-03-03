@@ -1,6 +1,8 @@
 (lang dune 3.21)
 
-(name P4)
+(name ourlang)
+
+(using menhir 3.0)
 
 (generate_opam_files true)
 
@@ -16,7 +18,7 @@
 (documentation https://url/to/documentation)
 
 (package
- (name P4)
+ (name ourlang)
  (synopsis "A short synopsis")
  (description "A longer description")
  (depends ocaml)
