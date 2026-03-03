@@ -1,2 +1,8 @@
 (library
- (name P4))
+ (name ourlang)
+ (modules ast lexer parser))
+
+(ocamllex lexer)
+
+(menhir
+  (modules parser))

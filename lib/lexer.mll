@@ -1,0 +1,112 @@
+{
+(* Bring the token constructors (CONSTANTS, IDENT, INT, NEWLINE, INDENT, ...) into scope *)
+open Parser
+
+(* Custom exception for reporting lexer errors back to main.ml *)
+exception Lexing_error of string
+
+(* A stack of indentation levels (in "columns"). The top is the current indent *)
+let indent_stack : int Stack.t = Stack.create ()
+
+(* Queue of "extra" tokens we decided to emit (INDENT/DEDENT/NEWLINE) before returning
+   the next real token. This is how we can produce multiple tokens from one match *)
+let pending : token Queue.t = Queue.create ()
+
+(* Beginning-of-line (BOL) flag: true iff the next characters we read are at BOL, so spaces/tabs
+   should be interpreted as indentation. *)
+let bol = ref true
+
+(* Initialize indentation stack with indent level 0 *)
+let () = Stack.push 0 indent_stack
+
+let lowercase = String.lowercase_ascii
+
+(* Recognize keywords vs identifiers.
+   - "constants" becomes the CONSTANTS token.
+   - everything else becomes IDENT "<x>". *)
+let keyword_or_ident s =
+  match lowercase s with
+  | "constants" -> CONSTANTS
+  | _ -> IDENT s
+
+(* Compare new indentation (n) with current indentation and enqueue INDENT/DEDENT
+   - If n > current: we entered a new block -> push and emit INDENT token
+   - If n < current: we exited one or more blocks -> pop and emit DEDENT(s) token
+   - If n doesn't match any previous indent level: indentation error *)
+let emit_indent_tokens n =
+  let current = Stack.top indent_stack in
+  if n > current then (
+    Stack.push n indent_stack;
+    Queue.add INDENT pending
+  ) else if n < current then (
+    while n < Stack.top indent_stack do
+      ignore (Stack.pop indent_stack);
+      Queue.add DEDENT pending
+    done;
+    if Stack.top indent_stack <> n then
+      raise (Lexing_error "Indentation error")
+  )
+}
+
+(* ocamllex regexp definitions go here, outside the OCAML header block *)
+let digit = ['0'-'9']
+let letter = ['a'-'z''A'-'Z''_']
+let ident = letter (letter|digit)*
+
+rule next_token = parse
+  (* Whitespace (spaces/tabs). Only meaningful at beginning of line (bol = true) *)
+  | [' ' '\t']+ as ws {
+      if !bol then (
+        (* Compute indentation width in columns, here tabs count as 4 spaces *)
+        let n =
+          ws |> String.to_seq |> Seq.fold_left (fun acc c ->
+            acc + (if c = '\t' then 4 else 1)
+          ) 0
+        in
+        (* After consuming indentation, we are no longer at BOL *)
+        bol := false;
+
+        (* Possibly enqueue INDENT/DEDENT tokens based on n *)
+        emit_indent_tokens n;
+
+        (* If we enqueued something, return it first, otherwise continue lexing *)
+        if Queue.is_empty pending then next_token lexbuf else Queue.take pending
+      ) else
+        (* Not at BOL: ignore extra spaces/tabs between tokens *)
+        next_token lexbuf
+    }
+
+  (* Line comment: skip from // to end of line but not the newline itself *)
+  | "//" [^'\n']* { next_token lexbuf }
+
+  (* Newline: mark BOL and return a NEWLINE token *)
+  | "\r\n" | "\n" {
+      bol := true;
+      Queue.add NEWLINE pending;
+      Queue.take pending
+    }
+
+  (* Single-character tokens *)
+  | ":" { bol := false; COLON }
+
+  (* Integers *)
+  | digit+ as n { bol := false; INT (int_of_string n) }
+
+  (* Identifier or keyword *)
+  | ident as s { bol := false; keyword_or_ident s }
+
+  (* End of file: emit DEDENT tokens until we return to indentation level 0,
+     then  return EOF *)
+  | eof {
+      while Stack.top indent_stack > 0 do
+        ignore (Stack.pop indent_stack);
+        Queue.add DEDENT pending
+      done;
+      if Queue.is_empty pending then EOF else Queue.take pending
+    }
+
+  (* Anything else is a lexer error *)
+  | _ { raise (Lexing_error "Unexpected character") }
+
+{
+}
