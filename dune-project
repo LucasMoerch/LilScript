@@ -1,6 +1,6 @@
 (lang dune 3.21)
 
-(name ourlang)
+(name lilscript)
 
 (using menhir 3.0)
 
@@ -18,7 +18,7 @@
 (documentation https://url/to/documentation)
 
 (package
- (name ourlang)
+ (name lilscript)
  (synopsis "A short synopsis")
  (description "A longer description")
  (depends ocaml)
