@@ -12,6 +12,10 @@ open Ast
 //OPERATORS
 %token PLUS MINUS MULTIPLY DIVIDE
 %token ASSIGN
+
+%left PLUS MINUS
+%left MULTIPLY DIVIDE
+
 %start <Ast.program> program
 %%
 
@@ -28,19 +32,21 @@ const_lines:
 const_line:
   IDENT COLON INT NEWLINE { { name = $1; value = Cint $3 } }
 expr:
-  | id = ident
+  | id = ident ASSIGN e = expr                    /* = Operator */
+      { Sassign (id, e) }
+  | id = ident                                    /*Variables*/
       { Evar id }
+  | e1 = expr o = binop e2 = expr                 /*Binary Operations*/
+      { Ebinop (o, e1, e2) }
+  
+    
   ;
 
 ident:
   | id = IDENT { { loc = ($startpos, $endpos); id } }
 ;
-stmt: 
-  | id = ident ASSIGN e = expr
-      { Sassign (id, e) }
-  ;
-/*Inline binary operators*/
-%inline binop:
+
+%inline binop:                                     /*Binds the binary operation to binop*/                                  
   | PLUS { Badd }
   | MINUS { Bmin }
   | MULTIPLY { Bmul }

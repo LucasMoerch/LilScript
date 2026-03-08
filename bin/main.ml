@@ -6,6 +6,13 @@ let read_file path =
   close_in ic;                             (* Always close the channel *)
   s
 
+
+  let string_of_const_value = function
+  | LilScript.Ast.Cint i -> string_of_int i
+  | LilScript.Ast.Cstring s -> Printf.sprintf "\"%s\"" s
+  | LilScript.Ast.Cbool b -> string_of_bool b
+  | LilScript.Ast.Cfloat f -> string_of_float f
+
 let () =
   (* Check if no CLI arg has been given *)
   if Array.length Sys.argv < 2 then (
@@ -30,7 +37,8 @@ let () =
 
     List.iter
       (fun c ->
-        Printf.printf "%s=%d\n%!" c.LilScript.Ast.name c.LilScript.Ast.value)
+        Printf.printf "%s=%s\n%!" c.LilScript.Ast.name
+        (string_of_const_value c.LilScript.Ast.value))
       ast.LilScript.Ast.constants
 
   with

@@ -19,7 +19,7 @@ and binop =
 and expr = 
   | Econst of const_decl
   | Evar of ident
-  | Ebinop of binop * ident * ident
+  | Ebinop of binop * expr * expr
 
 and stmt = 
   | Sassign of ident * expr
