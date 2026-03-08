@@ -88,6 +88,13 @@ rule next_token = parse
 
   (* Single-character tokens *)
   | ":" { bol := false; COLON }
+  | "=" { bol := false; ASSIGN}
+  | "+" { bol := false; PLUS}
+  | "-" { bol := false; MINUS}
+  | "*" { bol := false; MULTIPLY}
+  | "/" { bol := false; DIVIDE}
+  
+    
 
   (* Integers *)
   | digit+ as n { bol := false; INT (int_of_string n) }
