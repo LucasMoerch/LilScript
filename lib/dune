@@ -1,5 +1,5 @@
 (library
- (name ourlang)
+ (name lilscript)
  (modules ast lexer parser))
 
 (ocamllex lexer)

@@ -1,15 +1,15 @@
-# P4 / OurLang
+# P4 / LilScript
 
-OurLang is a small Domain Specfic Language implemented in OCaml (ocamllex + Menhir + Dune).  
+LilScript is a small Domain Specfic Language implemented in OCaml (ocamllex + Menhir + Dune).  
 
 ## Repo structure
 
-- `lib/` — the OurLang library
+- `lib/` — the LilScript library
   - `ast.ml` — AST types
   - `lexer.mll` — lexer (ocamllex)
   - `parser.mly` — parser (Menhir), builds the AST
 - `bin/` — executable(s)
-  - `main.ml` — CLI entrypoint (`ourlangc`)
+  - `main.ml` — CLI entrypoint (`lilscriptc`)
 - `test/` — tests
 - `example_games/` — example `.gg` programs (.gg for now)
 
@@ -28,10 +28,10 @@ opam install menhir
 dune build
 ```
 ## Run
-The executable is published as ourlangc.
+The executable is published as lilscriptc.
 ### Run on a file:
 ```bash
-dune exec ourlangc -- path/to/file.gg
+dune exec lilscriptc -- path/to/file.gg
 ```
 
 
