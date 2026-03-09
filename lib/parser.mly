@@ -13,7 +13,11 @@ open Ast
 %%
 
 program:
-  constants_block EOF { { constants = $1 } }
+  constants_block trailing_newlines EOF { { constants = $1 } }
+
+trailing_newlines:
+  /* empty */ { () }
+| NEWLINE trailing_newlines { () }
 
 constants_block:
   CONSTANTS COLON NEWLINE INDENT const_lines DEDENT { $5 }
