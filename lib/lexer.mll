@@ -3,7 +3,7 @@
 open Parser
 
 (* Custom exception for reporting lexer errors back to main.ml *)
-exception Lexing_error of string
+exception Lexing_error of string * Lexing.position
 
 (* A stack of indentation levels (in "columns"). The top is the current indent *)
 let indent_stack : int Stack.t = Stack.create ()
@@ -44,7 +44,7 @@ let emit_indent_tokens n =
       Queue.add DEDENT pending
     done;
     if Stack.top indent_stack <> n then
-      raise (Lexing_error "Indentation error")
+      raise (Lexing_error ("Indentation error", Lexing.lexeme_start_p lexbuf))
   )
 }
 
@@ -82,6 +82,7 @@ rule next_token = parse
   (* Newline: mark BOL and return a NEWLINE token *)
   | "\r\n" | "\n" {
       bol := true;
+      Lexing.new_line lexbuf;
       Queue.add NEWLINE pending;
       Queue.take pending
     }
@@ -106,7 +107,7 @@ rule next_token = parse
     }
 
   (* Anything else is a lexer error *)
-  | _ { raise (Lexing_error "Unexpected character") }
+  | _ { raise (Lexing_error ("Unexpected character", Lexing.lexeme_start_p lexbuf)) }
 
 {
 }

@@ -19,6 +19,7 @@ let () =
   (* Load the whole source file into memory and build a lexing buffer over it *)
   let src = read_file Sys.argv.(1) in
   let lexbuf = Lexing.from_string src in  (* Create lexbuf that reads from a string *)
+  lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = Sys.argv.(1) };
 
   try
     (* Parse using Menhir entrypoint program and the token supplier next_token *)
@@ -35,8 +36,10 @@ let () =
 
   with
   (* Lexer raises a custom exception when it sees illegal characters / malformed tokens *)
-  | LilScript.Lexer.Lexing_error msg ->
-      Printf.eprintf "Lexing error: %s\n%!" msg
+  | LilScript.Lexer.Lexing_error (msg, pos) ->
+    let line = pos.pos_lnum in
+    let col = pos.pos_cnum - pos.pos_bol + 1 in
+    Printf.eprintf "%s:%d:%d: %s\n%!" pos.pos_fname line col msg
 
   (* Menhir-generated parsers raise Parser.Error on syntax errors by default *)
   | LilScript.Parser.Error ->
