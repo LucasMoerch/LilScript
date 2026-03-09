@@ -1,26 +1,27 @@
 type location = Lexing.position * Lexing.position
-and ident = { loc: location; id: string; }
-type const_decl = { name : string; value : const_value }
-and const_value = 
+and ident = { loc : location; id : string }
+and binop = Badd | Bmin | Bmul | Bdiv
+
+(* Simple const for expressions (no name) *)
+type simple_const =
+  | SCint of int
+  | SCfloat of float
+  | SCbool of bool
+  | SCstring of string
+
+and expr =
+  | Econst of simple_const
+  | Evar of ident
+  | Ebinop of binop * expr * expr
+
+and const_value =
   | Cint of int
   | Cstring of string
   | Cbool of bool
   | Cfloat of float
+  | Cexpr of expr
+
+and const_decl = { name : string; value : const_value }
 
 type program = { constants : const_decl list }
-
-and binop = 
-  | Badd 
-  | Bmin 
-  | Bmul 
-  | Bdiv
-
-
-and expr = 
-  | Econst of const_decl
-  | Evar of ident
-  | Ebinop of binop * expr * expr
-
-and stmt = 
-  | Sassign of ident * expr
- 
+and stmt = Sassign of ident * expr
