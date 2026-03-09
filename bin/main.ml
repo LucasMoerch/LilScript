@@ -6,6 +6,13 @@ let read_file path =
   close_in ic;                             (* Always close the channel *)
   s
 
+(* Pretty-print constant values from the AST *)
+let string_of_const_value = function
+  | LilScript.Ast.Cint i -> string_of_int i
+  | LilScript.Ast.Cstring s -> Printf.sprintf "\"%s\"" s
+  | LilScript.Ast.Cbool b -> string_of_bool b
+  | LilScript.Ast.Cfloat f -> string_of_float f
+
 (* Flag for token dumping *)
 let dump_tokens = ref false
 let input_file = ref None
@@ -15,7 +22,7 @@ let options = [
 ]
 
 let set_file f =
-input_file := Some f
+  input_file := Some f
 
 let string_of_token = function
   | LilScript.Parser.CONSTANTS -> "CONSTANTS"
@@ -26,19 +33,26 @@ let string_of_token = function
   | LilScript.Parser.EOF -> "EOF"
   | LilScript.Parser.IDENT s -> "IDENT(" ^ s ^ ")"
   | LilScript.Parser.INT i -> "INT(" ^ string_of_int i ^ ")"
+  | LilScript.Parser.PLUS -> "PLUS"
+  | LilScript.Parser.MINUS -> "MINUS"
+  | LilScript.Parser.MULTIPLY -> "MULTIPLY"
+  | LilScript.Parser.DIVIDE -> "DIVIDE"
+  | LilScript.Parser.ASSIGN -> "ASSIGN"
+
 
 (* Print tokens until EOF *)
 let rec print_tokens lexbuf =
-let tok = LilScript.Lexer.next_token lexbuf in
+  let tok = LilScript.Lexer.next_token lexbuf in
   Printf.printf "%s\n%!" (string_of_token tok);
-match tok with
-| LilScript.Parser.EOF -> ()
-| _ -> print_tokens lexbuf
+  match tok with
+  | LilScript.Parser.EOF -> ()
+  | _ -> print_tokens lexbuf
 
 (* Parse CLI arguments *)
 let () =
   Arg.parse options set_file "Usage: lilscriptc [--tokens] <file>";
 
+  (* Check if no CLI arg has been given *)
   let filename =
     match !input_file with
     | Some f -> f
@@ -51,6 +65,7 @@ let () =
   (* Load the whole source file into memory and build a lexing buffer over it *)
   let src = read_file filename in
   let lexbuf = Lexing.from_string src in  (* Create lexbuf that reads from a string *)
+  lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = filename };
 
   try
     (* Parse using Menhir entrypoint program and the token supplier next_token *)
@@ -58,20 +73,21 @@ let () =
       print_tokens lexbuf
     else (
       let ast = LilScript.Parser.program LilScript.Lexer.next_token lexbuf in
-    
+
       Printf.printf "Parsed %d constants\n%!"
         (List.length ast.LilScript.Ast.constants);
-    
+
       List.iter
         (fun c ->
-          Printf.printf "%s=%d\n%!"
+          Printf.printf "%s=%s\n%!"
             c.LilScript.Ast.name
-            c.LilScript.Ast.value)
+            (string_of_const_value c.LilScript.Ast.value))
         ast.LilScript.Ast.constants
     )
-    
   with
-  | LilScript.Lexer.Lexing_error msg ->
-      Printf.eprintf "Lexing error: %s\n%!" msg
+  | LilScript.Lexer.Lexing_error (msg, pos) ->
+      let line = pos.pos_lnum in
+      let col = pos.pos_cnum - pos.pos_bol + 1 in
+      Printf.eprintf "%s:%d:%d: %s\n%!" pos.pos_fname line col msg
   | LilScript.Parser.Error ->
       Printf.eprintf "Parse error\n%!"
