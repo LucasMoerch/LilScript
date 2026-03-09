@@ -32,8 +32,8 @@ const_lines:
 const_line:
   IDENT COLON INT NEWLINE { { name = $1; value = Cint $3 } }
 expr:
-  | id = ident ASSIGN e = expr                    /* = Operator */
-      { Sassign (id, e) }
+  | c = INT                                       /*Integer Constants*/ 
+      { Econst (Cint c) }                        
   | id = ident                                    /*Variables*/
       { Evar id }
   | e1 = expr o = binop e2 = expr                 /*Binary Operations*/
@@ -41,6 +41,10 @@ expr:
   
     
   ;
+
+stmt:
+  | id = ident ASSIGN e = expr                    /* = Operator */
+    { Sassign (id, e) }
 
 ident:
   | id = IDENT { { loc = ($startpos, $endpos); id } }
