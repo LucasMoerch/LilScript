@@ -24,4 +24,3 @@ and const_value =
 and const_decl = { name : string; value : const_value }
 
 type program = { constants : const_decl list }
-and stmt = Sassign of ident * expr
