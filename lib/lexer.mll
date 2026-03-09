@@ -33,7 +33,7 @@ let keyword_or_ident s =
    - If n > current: we entered a new block -> push and emit INDENT token
    - If n < current: we exited one or more blocks -> pop and emit DEDENT(s) token
    - If n doesn't match any previous indent level: indentation error *)
-let emit_indent_tokens n =
+let emit_indent_tokens n lexbuf =
   let current = Stack.top indent_stack in
   if n > current then (
     Stack.push n indent_stack;
@@ -67,7 +67,7 @@ rule next_token = parse
         bol := false;
 
         (* Possibly enqueue INDENT/DEDENT tokens based on n *)
-        emit_indent_tokens n;
+        emit_indent_tokens n lexbuf;
 
         (* If we enqueued something, return it first, otherwise continue lexing *)
         if Queue.is_empty pending then next_token lexbuf else Queue.take pending
