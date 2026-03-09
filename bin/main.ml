@@ -33,6 +33,12 @@ let string_of_token = function
   | LilScript.Parser.EOF -> "EOF"
   | LilScript.Parser.IDENT s -> "IDENT(" ^ s ^ ")"
   | LilScript.Parser.INT i -> "INT(" ^ string_of_int i ^ ")"
+  | LilScript.Parser.PLUS -> "PLUS"
+  | LilScript.Parser.MINUS -> "MINUS"
+  | LilScript.Parser.MULTIPLY -> "MULTIPLY"
+  | LilScript.Parser.DIVIDE -> "DIVIDE"
+  | LilScript.Parser.ASSIGN -> "ASSIGN"
+
 
 (* Print tokens until EOF *)
 let rec print_tokens lexbuf =
