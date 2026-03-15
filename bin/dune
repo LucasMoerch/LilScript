@@ -2,4 +2,4 @@
  (name main)
  (public_name lilscriptc)
  (modules main)
- (libraries lilscript))
+ (libraries LilScript))

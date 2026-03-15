@@ -1,8 +1,8 @@
 (library
- (name lilscript)
+ (name LilScript)
  (modules ast lexer parser))
 
 (ocamllex lexer)
 
 (menhir
-  (modules parser))
+ (modules parser))

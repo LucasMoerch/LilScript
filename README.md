@@ -11,7 +11,7 @@ LilScript is a small Domain Specfic Language implemented in OCaml (ocamllex + Me
 - `bin/` — executable(s)
   - `main.ml` — CLI entrypoint (`lilscriptc`)
 - `test/` — tests
-- `example_games/` — example `.gg` programs (.gg for now)
+- `example_games/` — example `.lil` programs
 
 ## Requirements
 
@@ -31,7 +31,9 @@ dune build
 The executable is published as lilscriptc.
 ### Run on a file:
 ```bash
-dune exec lilscriptc -- path/to/file.gg
+dune exec lilscriptc -- path/to/file.lil
 ```
-
-
+### Run in token dump mode:
+```bash
+dune exec lilscriptc -- --tokens path/to/file.lil
+```
