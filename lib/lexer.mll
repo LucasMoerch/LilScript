@@ -93,8 +93,16 @@ rule next_token = parse
   | "-" { bol := false; MINUS}
   | "*" { bol := false; MULTIPLY}
   | "/" { bol := false; DIVIDE}
+  | "[" { bol := false; LBRACKET}
+  | "]" { bol := false; RBRACKET}
+  | "," { bol := false; COMMA}
 
-
+  (*Keywords*)
+  | "arena"   { ARENA }
+  | "win"     { WIN }
+  | "lose"    { LOSE }
+  | "spawn"   { SPAWN }
+  | "players" { PLAYERS }
 
   (* Integers *)
   | digit+ as n { bol := false; INT (int_of_string n) }

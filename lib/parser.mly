@@ -3,10 +3,11 @@ open Ast
 %}
 
 %token CONSTANTS
-%token COLON
+%token COLON COMMA LBRACKET RBRACKET
 %token NEWLINE INDENT DEDENT
 %token <string> IDENT
 %token <int> INT
+%token <string> STRING
 %token EOF
 
 //OPERATORS
@@ -14,7 +15,8 @@ open Ast
 
 %left PLUS MINUS
 %left MULTIPLY DIVIDE
-
+//Keywords
+%token ARENA WIN LOSE SPAWN PLAYERS
 %start <Ast.program> program
 %%
 
@@ -34,12 +36,12 @@ const_line:
 
 expr:
   | INT { Econst (SCint $1) }
-  | e1 = expr PLUS e2 = expr { Ebinop (Badd, e1, e2) }
-  | e1 = expr MINUS e2 = expr { Ebinop (Bmin, e1, e2) }
+  (*| e1 = expr PLUS e2 = expr { Ebinop (Badd, e1, e2) }These two are redundant*)
+  (*| e1 = expr MINUS e2 = expr { Ebinop (Bmin, e1, e2) } They are already contained in the generic binop operations*)
   | id = ident                                    /*Variables*/
       { Evar id }
-  | e1 = expr o = binop e2 = expr                 /*Binary Operations*/
-      { Ebinop (o, e1, e2) }
+  | e1 = expr op = binop e2 = expr                 /*Binary Operations*/
+      { Ebinop (op, e1, e2) }
   ;
 
 ident:
