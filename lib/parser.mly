@@ -16,7 +16,8 @@ open Ast
 %left PLUS MINUS
 %left MULTIPLY DIVIDE
 //Keywords
-%token ARENA WIN LOSE SPAWN PLAYERS
+%token ARENA WIN LOSE SPAWN PLAYERS 
+%token KEYS JUMP LEFT RIGHT 
 %start <Ast.program> program
 %%
 
@@ -42,8 +43,9 @@ expr:
       { Evar id }
   | e1 = expr op = binop e2 = expr                 /*Binary Operations*/
       { Ebinop (op, e1, e2) }
+  | LBRACKET e=seperated_list(COMMA, expr) RBRACKET {Elist} /*Lists*/
   ;
-
+  /*KEYS COMMA NEWLINE JUMP COMMA expr NEWLINE RIGHT COMMA expr NEWLINE LEFT COMMA expr/*
 ident:
   | id = IDENT { { loc = ($startpos, $endpos); id } }
 ;

@@ -98,11 +98,20 @@ rule next_token = parse
   | "," { bol := false; COMMA}
 
   (*Keywords*)
-  | "arena"   { ARENA }
-  | "win"     { WIN }
-  | "lose"    { LOSE }
-  | "spawn"   { SPAWN }
-  | "players" { PLAYERS }
+  | "arena"     { ARENA }
+  | "win"       { WIN }
+  | "lose"      { LOSE }
+  | "spawn"     { SPAWN }
+  | "players"   { PLAYERS }
+  | "keys"      { KEYS }
+  | "jump"      { JUMP }
+  | "left"      { LEFT }
+  | "right"     { RIGHT }
+
+
+  (* Strings*)
+  | '"'        { string_literal (Buffer.create 16) lexbuf }
+
 
   (* Integers *)
   | digit+ as n { bol := false; INT (int_of_string n) }
