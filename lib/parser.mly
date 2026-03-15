@@ -19,7 +19,11 @@ open Ast
 %%
 
 program:
-  constants_block EOF { { constants = $1 } }
+  constants_block trailing_newlines EOF { { constants = $1 } }
+
+trailing_newlines:
+  /* empty */ { () }
+| NEWLINE trailing_newlines { () }
 
 constants_block:
   CONSTANTS COLON NEWLINE INDENT const_lines DEDENT { $5 }
@@ -29,8 +33,14 @@ const_lines:
 | const_line const_lines { $1 :: $2 }
 
 const_line:
-  | IDENT COLON INT NEWLINE { { name = $1; value = Cint $3 } }
-  | IDENT COLON expr NEWLINE { { name = $1; value = Cexpr $3 } }
+  | IDENT COLON INT NEWLINE { 
+    let start_pos = $startpos in
+    { name = $1; value = Cint $3; pos = start_pos } 
+  }
+  | IDENT COLON expr NEWLINE { 
+      let start_pos = $startpos in
+      { name = $1; value = Cexpr $3; pos = start_pos } 
+    }
 
 expr:
   | INT { Econst (SCint $1) }

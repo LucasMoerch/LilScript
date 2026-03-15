@@ -21,6 +21,8 @@ and const_value =
   | Cfloat of float
   | Cexpr of expr
 
-and const_decl = { name : string; value : const_value }
+and const_decl = { name : string; value : const_value; pos : Lexing.position }
+
+
 
 type program = { constants : const_decl list }
