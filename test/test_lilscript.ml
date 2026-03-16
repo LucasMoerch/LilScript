@@ -45,9 +45,6 @@ let test_emit_bad_indent _ =
     (LilScript.Lexer.Lexing_error ("Indentation error", Lexing.lexeme_start_p lexbuf))
     (fun () -> LilScript.Lexer.emit_indent_tokens 2 lexbuf)
 
-
-
-
 let test_int _ =
   let lexbuf = Lexing.from_string "42" in
   let tok = LilScript.Lexer.next_token lexbuf in
@@ -69,7 +66,7 @@ let test_MULTIPLY _ =
   let tok = LilScript.Lexer.next_token lexbuf in
   assert_equal (MULTIPLY) tok
 
-let test_DIVgit IDE _ =
+let test_DIVIDE _ =
   let lexbuf = Lexing.from_string "/" in
   let tok = LilScript.Lexer.next_token lexbuf in
   assert_equal (DIVIDE) tok
@@ -107,4 +104,4 @@ let suite =
 
 (* Run the suite *)
 let () =
-  run_test_tt_main suitegit 
+  run_test_tt_main suite
