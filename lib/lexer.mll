@@ -80,12 +80,13 @@ rule next_token = parse
   | "//" [^'\n']* { next_token lexbuf }
 
   (* Newline: mark BOL and return a NEWLINE token *)
-  | "\r\n" | "\n" {
+  | "\r\n" | '\n' | '\r' {
       bol := true;
       Lexing.new_line lexbuf;
       Queue.add NEWLINE pending;
       Queue.take pending
-    }
+  }
+
 
   (* Single-character tokens *)
   | ":" { bol := false; COLON }
