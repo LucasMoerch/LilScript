@@ -33,22 +33,22 @@ const_lines:
 | const_line const_lines { $1 :: $2 }
 
 const_line:
-  | IDENT COLON INT NEWLINE { 
+  | IDENT COLON INT NEWLINE {
     let start_pos = $startpos in
-    { name = $1; value = Cint $3; pos = start_pos } 
+    { name = $1; value = Cint $3; pos = start_pos }
   }
-  | IDENT COLON expr NEWLINE { 
+  | IDENT COLON expr NEWLINE {
       let start_pos = $startpos in
-      { name = $1; value = Cexpr $3; pos = start_pos } 
+      { name = $1; value = Cexpr $3; pos = start_pos }
     }
 
 expr:
   | INT { Econst (SCint $1) }
   | e1 = expr PLUS e2 = expr { Ebinop (Badd, e1, e2) }
   | e1 = expr MINUS e2 = expr { Ebinop (Bmin, e1, e2) }
-  | id = ident                                    /*Variables*/
+  | id = ident /*Variables*/
       { Evar id }
-  | e1 = expr o = binop e2 = expr                 /*Binary Operations*/
+  | e1 = expr o = binop e2 = expr /*Binary Operations*/
       { Ebinop (o, e1, e2) }
   ;
 
@@ -56,7 +56,7 @@ ident:
   | id = IDENT { { loc = ($startpos, $endpos); id } }
 ;
 
-%inline binop:                                     /*Binds the binary operation to binop*/
+%inline binop: /*Binds the binary operation to binop*/
   | PLUS { Badd }
   | MINUS { Bmin }
   | MULTIPLY { Bmul }

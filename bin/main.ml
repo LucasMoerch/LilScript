@@ -14,17 +14,17 @@ let read_file path =
 (* Check for duplicate constants and report position *)
 let check_duplicates constants =
   let seen = Hashtbl.create 16 in
-  List.iter (fun c ->
-    if Hashtbl.mem seen c.LilScript.Ast.name then (
-      let pos = c.pos in
-      let line = pos.pos_lnum in
-      let col = pos.pos_cnum - pos.pos_bol + 1 in
-      Printf.eprintf "%s:%d:%d: Duplicate constant '%s'\n%!"
-        pos.pos_fname line col c.name;
-      exit 1
-    ) else
-      Hashtbl.add seen c.LilScript.Ast.name c
-  ) constants
+  List.iter
+    (fun c ->
+      if Hashtbl.mem seen c.LilScript.Ast.name then (
+        let pos = c.pos in
+        let line = pos.pos_lnum in
+        let col = pos.pos_cnum - pos.pos_bol + 1 in
+        Printf.eprintf "%s:%d:%d: Duplicate constant '%s'\n%!" pos.pos_fname
+          line col c.name;
+        exit 1)
+      else Hashtbl.add seen c.LilScript.Ast.name c)
+    constants
 
 (* Pretty-print expressions *)
 let rec string_of_expr = function
@@ -51,8 +51,7 @@ let string_of_const_value = function
   | LilScript.Ast.Cstring s -> Printf.sprintf "\"%s\"" s
   | LilScript.Ast.Cbool b -> string_of_bool b
   | LilScript.Ast.Cfloat f -> string_of_float f
-  | LilScript.Ast.Cexpr e ->
-      string_of_expr e
+  | LilScript.Ast.Cexpr e -> string_of_expr e
 
 (* Simple evaluator for expressions *)
 let rec eval_expr env = function
@@ -65,16 +64,15 @@ let rec eval_expr env = function
   | LilScript.Ast.Evar id ->
       if Hashtbl.mem env id.LilScript.Ast.id then
         Hashtbl.find env id.LilScript.Ast.id
-      else
-        failwith ("Unknown constant: " ^ id.LilScript.Ast.id)
-  | LilScript.Ast.Ebinop (op, e1, e2) ->
+      else failwith ("Unknown constant: " ^ id.LilScript.Ast.id)
+  | LilScript.Ast.Ebinop (op, e1, e2) -> (
       let v1 = eval_expr env e1 in
       let v2 = eval_expr env e2 in
-      (match op with
-       | LilScript.Ast.Badd -> v1 +. v2
-       | LilScript.Ast.Bmin -> v1 -. v2
-       | LilScript.Ast.Bmul -> v1 *. v2
-       | LilScript.Ast.Bdiv -> v1 /. v2)
+      match op with
+      | LilScript.Ast.Badd -> v1 +. v2
+      | LilScript.Ast.Bmin -> v1 -. v2
+      | LilScript.Ast.Bmul -> v1 *. v2
+      | LilScript.Ast.Bdiv -> v1 /. v2)
 
 (* Flag for token dumping *)
 let dump_tokens = ref false
@@ -147,14 +145,14 @@ let () =
 
       (* Build environment for evaluation *)
       let env = Hashtbl.create 16 in
-      List.iter (fun c ->
-        match c.LilScript.Ast.value with
-        | LilScript.Ast.Cint i ->
-            Hashtbl.add env c.LilScript.Ast.name (float_of_int i)
-        | LilScript.Ast.Cfloat f ->
-            Hashtbl.add env c.LilScript.Ast.name f
-        | _ -> ()
-      ) ast.LilScript.Ast.constants;
+      List.iter
+        (fun c ->
+          match c.LilScript.Ast.value with
+          | LilScript.Ast.Cint i ->
+              Hashtbl.add env c.LilScript.Ast.name (float_of_int i)
+          | LilScript.Ast.Cfloat f -> Hashtbl.add env c.LilScript.Ast.name f
+          | _ -> ())
+        ast.LilScript.Ast.constants;
 
       (* Evaluate expressions *)
       Printf.printf "\nEvaluated:\n%!";
@@ -162,16 +160,15 @@ let () =
         (fun c ->
           match c.LilScript.Ast.value with
           | LilScript.Ast.Cexpr e ->
-              Printf.printf "%s = %.0f\n%!" c.LilScript.Ast.name (eval_expr env e)
+              Printf.printf "%s = %.0f\n%!" c.LilScript.Ast.name
+                (eval_expr env e)
           | LilScript.Ast.Cint i ->
               Printf.printf "%s = %d\n%!" c.LilScript.Ast.name i
           | _ -> ())
         ast.LilScript.Ast.constants
-
   with
   | LilScript.Lexer.Lexing_error (msg, pos) ->
       let line = pos.pos_lnum in
       let col = pos.pos_cnum - pos.pos_bol + 1 in
       Printf.eprintf "%s:%d:%d: %s\n%!" pos.pos_fname line col msg
-  | LilScript.Parser.Error ->
-      Printf.eprintf "Parse error\n%!"
+  | LilScript.Parser.Error -> Printf.eprintf "Parse error\n%!"

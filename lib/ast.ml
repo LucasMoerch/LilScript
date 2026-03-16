@@ -23,6 +23,4 @@ and const_value =
 
 and const_decl = { name : string; value : const_value; pos : Lexing.position }
 
-
-
 type program = { constants : const_decl list }
