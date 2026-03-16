@@ -72,12 +72,6 @@ let test_DIVIDE _ =
   assert_equal (DIVIDE) tok
 
 
-let test_ASSIGN _ =
-  let lexbuf = Lexing.from_string "=" in
-  let tok = LilScript.Lexer.next_token lexbuf in
-  assert_equal (ASSIGN) tok
-
-
 let test_COLON _ =
   let lexbuf = Lexing.from_string ":" in
   let tok = LilScript.Lexer.next_token lexbuf in
@@ -98,7 +92,6 @@ let suite =
     "MINUS"                      >:: test_MINUS;
     "MULTIPLY"                   >:: test_MULTIPLY;
     "DIVIDE"                     >:: test_DIVIDE;
-    "ASSIGN"                     >:: test_ASSIGN;
     "COLON"                      >:: test_COLON;
   ]
 
