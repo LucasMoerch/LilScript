@@ -1,5 +1,6 @@
 %{
 open Ast
+open Keys
 %}
 
 %token CONSTANTS
@@ -17,7 +18,7 @@ open Ast
 %left MULTIPLY DIVIDE
 //Keywords
 %token ARENA WIN LOSE SPAWN PLAYERS 
-%token KEYS JUMP LEFT RIGHT 
+%token KEYS
 %start <Ast.program> program
 %%
 
@@ -45,10 +46,34 @@ expr:
       { Ebinop (op, e1, e2) }
   | LBRACKET e=seperated_list(COMMA, expr) RBRACKET {Elist} /*Lists*/
   ;
-  /*KEYS COMMA NEWLINE JUMP COMMA expr NEWLINE RIGHT COMMA expr NEWLINE LEFT COMMA expr/*
+  /*KEYS COMMA NEWLINE JUMP COMMA expr NEWLINE RIGHT COMMA expr NEWLINE LEFT COMMA expr*/
 ident:
   | id = IDENT { { loc = ($startpos, $endpos); id } }
 ;
+
+stmt:
+  | KEYS COLON NEWLINE INDENT keybind_list DEDENT
+      { Keybinds $5 }
+
+keybind_list: /*A keybind list can be one keybind or more keybinds*/
+  | keybind
+      { [$1] }
+  | keybind_list keybind
+      { $1 @ [$2] }
+key_name: 
+  | JUMP   { "jump" }
+  | LEFT   { "left" }
+  | RIGHT  { "right" }
+
+
+keybind:
+  | key_name COLON IDENT NEWLINE
+      {
+        if is_valid_key $3 then
+          ($1, $3)
+        else
+          failwith ("Invalid key: " ^ $3)
+      } 
 
 %inline binop:                                     /*Binds the binary operation to binop*/
   | PLUS { Badd }

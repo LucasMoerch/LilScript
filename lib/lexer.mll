@@ -104,9 +104,6 @@ rule next_token = parse
   | "spawn"     { SPAWN }
   | "players"   { PLAYERS }
   | "keys"      { KEYS }
-  | "jump"      { JUMP }
-  | "left"      { LEFT }
-  | "right"     { RIGHT }
 
 
   (* Strings*)
