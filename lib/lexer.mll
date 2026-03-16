@@ -113,7 +113,10 @@ rule next_token = parse
     }
 
   (* Anything else is a lexer error *)
-  | _ { raise (Lexing_error ("Unexpected character", Lexing.lexeme_start_p lexbuf)) }
+  (*line 118 returns the character/string that matched "_", and "^" concatenates strings*)
+  | _ { 
+      let c = Lexing.lexeme lexbuf in
+      raise (Lexing_error ("Unexpected character" ^ c, Lexing.lexeme_start_p lexbuf)) }
 
 {
 }
