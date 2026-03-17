@@ -18,7 +18,7 @@ open Keys
 %left MULTIPLY DIVIDE
 //Keywords
 %token ARENA WIN LOSE SPAWN PLAYERS 
-%token KEYS
+%token KEYS JUMP LEFT RIGHT
 %start <Ast.program> program
 %%
 
@@ -44,9 +44,9 @@ expr:
       { Evar id }
   | e1 = expr op = binop e2 = expr                 /*Binary Operations*/
       { Ebinop (op, e1, e2) }
-  | LBRACKET e=seperated_list(COMMA, expr) RBRACKET {Elist} /*Lists*/
+  | LBRACKET e = separated_list(COMMA, expr) RBRACKET { Elist e } /*Lists*/
   ;
-  /*KEYS COMMA NEWLINE JUMP COMMA expr NEWLINE RIGHT COMMA expr NEWLINE LEFT COMMA expr*/
+
 ident:
   | id = IDENT { { loc = ($startpos, $endpos); id } }
 ;
@@ -60,20 +60,21 @@ keybind_list: /*A keybind list can be one keybind or more keybinds*/
       { [$1] }
   | keybind_list keybind
       { $1 @ [$2] }
-key_name: 
-  | JUMP   { "jump" }
-  | LEFT   { "left" }
-  | RIGHT  { "right" }
+%inline key_name: /*The diffent type of actions you can bind*/
+  | JUMP   { Jump }
+  | LEFT   { Left }
+  | RIGHT  { Right }
 
 
 keybind:
-  | key_name COLON IDENT NEWLINE
+  | key_name COLON IDENT NEWLINE /*Creates the keybind only if the indent inserted is on the keyboard*/
       {
-        if is_valid_key $3 then
+        if is_valid_key $3 then 
           ($1, $3)
         else
           failwith ("Invalid key: " ^ $3)
       } 
+      
 
 %inline binop:                                     /*Binds the binary operation to binop*/
   | PLUS { Badd }
