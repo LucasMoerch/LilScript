@@ -24,3 +24,43 @@ and const_value =
 and const_decl = { name : string; value : const_value; pos : Lexing.position }
 
 type program = { constants : const_decl list }
+
+type tile_kind =
+  | Tsolid
+  | Twin
+  | Tlose
+  | Tempty
+
+type position = {
+  x : int;
+  y : int;
+}
+
+type arena = {
+  width : int;
+  height : int;
+  tiles : tile_kind array array;
+}
+
+type action =
+  | MoveUp
+  | MoveDown
+  | MoveLeft
+  | MoveRight
+
+type keybind = {
+  key : string;
+  action : action;
+}
+
+type player = {
+  color : string;
+  spawn : position;
+  keybinds : keybind list;
+}
+
+type program = {
+  constants : const_decl list;
+  arena : arena option;
+  players : player list;
+}
