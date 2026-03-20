@@ -25,9 +25,10 @@ let lowercase = String.lowercase_ascii
    - "constants" becomes the CONSTANTS token.
    - everything else becomes IDENT "<x>". *)
 let keyword_or_ident s =
-  match lowercase s with
+  let lower = lowercase s in
+  match lower with
   | "constants" -> CONSTANTS
-  | _ -> IDENT s
+  | _ -> IDENT lower        (* Normalize to lowercase *)
 
 (* Compare new indentation (n) with current indentation and enqueue INDENT/DEDENT
    - If n > current: we entered a new block -> push and emit INDENT token
@@ -115,7 +116,7 @@ rule next_token = parse
 
   (* Anything else is a lexer error *)
   (*line 118 returns the character/string that matched "_", and "^" concatenates strings*)
-  | _ { 
+  | _ {
       let c = Lexing.lexeme lexbuf in
       raise (Lexing_error ("Unexpected character: " ^ c, Lexing.lexeme_start_p lexbuf)) }
 

@@ -14,8 +14,7 @@ let test_keyword_or_ident_uppercase _ =
   assert_equal CONSTANTS (LilScript.Lexer.keyword_or_ident "Constants");
   assert_equal CONSTANTS (LilScript.Lexer.keyword_or_ident "cOnStAnTs")
 
-
- (* Test 1: n > current → should add INDENT *)
+(* Test 1: n > current → should add INDENT *)
 let test_emit_indent _ =
   Stack.clear LilScript.Lexer.indent_stack;
   Stack.push 0 LilScript.Lexer.indent_stack;
@@ -42,7 +41,8 @@ let test_emit_bad_indent _ =
   Queue.clear LilScript.Lexer.pending;
   let lexbuf = Lexing.from_string "" in
   assert_raises
-    (LilScript.Lexer.Lexing_error ("Indentation error", Lexing.lexeme_start_p lexbuf))
+    (LilScript.Lexer.Lexing_error
+       ("Indentation error", Lexing.lexeme_start_p lexbuf))
     (fun () -> LilScript.Lexer.emit_indent_tokens 2 lexbuf)
 
 let test_int _ =
@@ -53,48 +53,45 @@ let test_int _ =
 let test_PLUS _ =
   let lexbuf = Lexing.from_string "+" in
   let tok = LilScript.Lexer.next_token lexbuf in
-  assert_equal (PLUS) tok
-
+  assert_equal PLUS tok
 
 let test_MINUS _ =
   let lexbuf = Lexing.from_string "-" in
   let tok = LilScript.Lexer.next_token lexbuf in
-  assert_equal (MINUS) tok
+  assert_equal MINUS tok
 
 let test_MULTIPLY _ =
   let lexbuf = Lexing.from_string "*" in
   let tok = LilScript.Lexer.next_token lexbuf in
-  assert_equal (MULTIPLY) tok
+  assert_equal MULTIPLY tok
 
 let test_DIVIDE _ =
   let lexbuf = Lexing.from_string "/" in
   let tok = LilScript.Lexer.next_token lexbuf in
-  assert_equal (DIVIDE) tok
-
+  assert_equal DIVIDE tok
 
 let test_COLON _ =
   let lexbuf = Lexing.from_string ":" in
   let tok = LilScript.Lexer.next_token lexbuf in
-  assert_equal (COLON) tok
+  assert_equal COLON tok
 
-
-  (* Test suite *)
+(* Test suite *)
 let suite =
-  "Lexer tests" >::: [
-    "constants keyword" >:: test_keyword_or_ident_constants;
-    "other identifiers" >:: test_keyword_or_ident_other;
-    "constants case-insensitive" >:: test_keyword_or_ident_uppercase;
-    "emit indent"                >:: test_emit_indent;
-    "emit dedent"                >:: test_emit_dedent;
-    "emit bad indent"            >:: test_emit_bad_indent;
-    "INT"                        >:: test_int;
-    "PLUS"                       >:: test_PLUS;
-    "MINUS"                      >:: test_MINUS;
-    "MULTIPLY"                   >:: test_MULTIPLY;
-    "DIVIDE"                     >:: test_DIVIDE;
-    "COLON"                      >:: test_COLON;
-  ]
+  "Lexer tests"
+  >::: [
+         "constants keyword" >:: test_keyword_or_ident_constants;
+         "other identifiers" >:: test_keyword_or_ident_other;
+         "constants case-insensitive" >:: test_keyword_or_ident_uppercase;
+         "emit indent" >:: test_emit_indent;
+         "emit dedent" >:: test_emit_dedent;
+         "emit bad indent" >:: test_emit_bad_indent;
+         "INT" >:: test_int;
+         "PLUS" >:: test_PLUS;
+         "MINUS" >:: test_MINUS;
+         "MULTIPLY" >:: test_MULTIPLY;
+         "DIVIDE" >:: test_DIVIDE;
+         "COLON" >:: test_COLON;
+       ]
 
 (* Run the suite *)
-let () =
-  run_test_tt_main suite
+let () = run_test_tt_main suite

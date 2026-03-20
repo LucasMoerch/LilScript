@@ -83,7 +83,7 @@ let options : (string * Arg.spec * string) list =
   [
     ("--tokens", Arg.Set dump_tokens, "Print the token stream and exit");
     ("--ast", Arg.Set dump_ast, "Dump AST after parsing");
-  ];;
+  ]
 
 let set_file f = input_file := Some f
 
