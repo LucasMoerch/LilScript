@@ -76,10 +76,14 @@ let rec eval_expr env = function
 
 (* Flag for token dumping *)
 let dump_tokens = ref false
+let dump_ast = ref false
 let input_file = ref None
 
-let options =
-  [ ("--tokens", Arg.Set dump_tokens, "Print the token stream and exit") ]
+let options : (string * Arg.spec * string) list =
+  [
+    ("--tokens", Arg.Set dump_tokens, "Print the token stream and exit");
+    ("--ast", Arg.Set dump_ast, "Dump AST after parsing");
+  ]
 
 let set_file f = input_file := Some f
 
@@ -129,6 +133,9 @@ let () =
     else
       (* Parse using Menhir entrypoint program and the token supplier next_token *)
       let ast = LilScript.Parser.program LilScript.Lexer.next_token lexbuf in
+
+      (* Dump AST for the debugging *)
+      if !dump_ast then LilScript.Ast_printer.dump ast;
 
       (*Check for duplicate constants*)
       check_duplicates ast.LilScript.Ast.constants;
