@@ -96,6 +96,9 @@ rule next_token = parse
   | "*" { bol := false; MULTIPLY}
   | "/" { bol := false; DIVIDE}
 
+  (* Support for parentheses to allow grouped expressions like (2 + 3) *)
+  | "(" { bol := false; LPAREN }
+  | ")" { bol := false; RPAREN }
 
 
   (* Integers *)
