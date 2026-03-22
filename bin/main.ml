@@ -72,6 +72,7 @@ let rec eval_expr env = function
         Printf.eprintf "%s:%d:%d: Unknown constant '%s'\n%!" pos.pos_fname line
           col id.LilScript.Ast.id;
         exit 1
+      else failwith ("Unknown constant: " ^ id.LilScript.Ast.id)
   | LilScript.Ast.Ebinop (op, e1, e2) -> (
       let v1 = eval_expr env e1 in
       let v2 = eval_expr env e2 in
@@ -83,10 +84,14 @@ let rec eval_expr env = function
 
 (* Flag for token dumping *)
 let dump_tokens = ref false
+let dump_ast = ref false
 let input_file = ref None
 
-let options =
-  [ ("--tokens", Arg.Set dump_tokens, "Print the token stream and exit") ]
+let options : (string * Arg.spec * string) list =
+  [
+    ("--tokens", Arg.Set dump_tokens, "Print the token stream and exit");
+    ("--ast", Arg.Set dump_ast, "Dump AST after parsing");
+  ]
 
 let set_file f = input_file := Some f
 
@@ -103,6 +108,8 @@ let string_of_token = function
   | LilScript.Parser.MINUS -> "MINUS"
   | LilScript.Parser.MULTIPLY -> "MULTIPLY"
   | LilScript.Parser.DIVIDE -> "DIVIDE"
+  | LilScript.Parser.LPAREN -> "LPAREN"
+  | LilScript.Parser.RPAREN -> "RPAREN"
 
 (* Print tokens until EOF *)
 let rec print_tokens lexbuf =
@@ -136,6 +143,9 @@ let () =
     else
       (* Parse using Menhir entrypoint program and the token supplier next_token *)
       let ast = LilScript.Parser.program LilScript.Lexer.next_token lexbuf in
+
+      (* Dump AST for the debugging *)
+      if !dump_ast then LilScript.Ast_printer.dump ast;
 
       (*Check for duplicate constants*)
       check_duplicates ast.LilScript.Ast.constants;

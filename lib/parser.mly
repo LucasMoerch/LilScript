@@ -2,6 +2,7 @@
 open Ast
 %}
 
+%token LPAREN RPAREN (* Tokens for parentheses to support grouped expressions *)
 %token CONSTANTS
 %token COLON
 %token NEWLINE INDENT DEDENT
@@ -33,7 +34,7 @@ const_lines:
 | const_line const_lines { $1 :: $2 }
 
 const_line:
-  | IDENT COLON INT NEWLINE { 
+  | IDENT COLON INT NEWLINE {
     let start_pos = $startpos in
     { name = $1; value = Cint $3; pos = start_pos } }
     
@@ -43,22 +44,21 @@ const_line:
   | IDENT COLON NEWLINE
       { { name = $1; value = Cempty; pos = $startpos } }
 
+(* Update the expression grammar by removing generic binop rule (expr o expr) because it breaks precedence
+, added explicit rules for each operator so precedence works correctly and
+ added parentheses rule to allow grouping: (expr) *)
 expr:
   | INT { Econst (SCint $1) }
+  | id = ident { Evar id }
+
   | e1 = expr PLUS e2 = expr { Ebinop (Badd, e1, e2) }
   | e1 = expr MINUS e2 = expr { Ebinop (Bmin, e1, e2) }
-  | id = ident                                    /*Variables*/
-      { Evar id }
-  | e1 = expr o = binop e2 = expr                 /*Binary Operations*/
-      { Ebinop (o, e1, e2) }
-  ;
+  | e1 = expr MULTIPLY e2 = expr { Ebinop (Bmul, e1, e2) }
+  | e1 = expr DIVIDE e2 = expr { Ebinop (Bdiv, e1, e2) }
+
+  | LPAREN e = expr RPAREN { e }
+;
 
 ident:
   | id = IDENT { { loc = ($startpos, $endpos); id; pos = $startpos } }
 ;
-
-%inline binop:                                     /*Binds the binary operation to binop*/
-  | PLUS { Badd }
-  | MINUS { Bmin }
-  | MULTIPLY { Bmul }
-  | DIVIDE { Bdiv }

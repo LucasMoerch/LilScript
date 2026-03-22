@@ -25,9 +25,10 @@ let lowercase = String.lowercase_ascii
    - "constants" becomes the CONSTANTS token.
    - everything else becomes IDENT "<x>". *)
 let keyword_or_ident s =
-  match lowercase s with
+  let lower = lowercase s in
+  match lower with
   | "constants" -> CONSTANTS
-  | _ -> IDENT s
+  | _ -> IDENT lower        (* Normalize to lowercase *)
 
 (* Compare new indentation (n) with current indentation and enqueue INDENT/DEDENT
    - If n > current: we entered a new block -> push and emit INDENT token
@@ -80,12 +81,13 @@ rule next_token = parse
   | "//" [^'\n']* { next_token lexbuf }
 
   (* Newline: mark BOL and return a NEWLINE token *)
-  | "\r\n" | "\n" {
+  | "\r\n" | '\n' | '\r' {
       bol := true;
       Lexing.new_line lexbuf;
       Queue.add NEWLINE pending;
       Queue.take pending
-    }
+  }
+
 
   (* Single-character tokens *)
   | ":" { bol := false; COLON }
@@ -94,6 +96,9 @@ rule next_token = parse
   | "*" { bol := false; MULTIPLY}
   | "/" { bol := false; DIVIDE}
 
+  (* Support for parentheses to allow grouped expressions like (2 + 3) *)
+  | "(" { bol := false; LPAREN }
+  | ")" { bol := false; RPAREN }
 
 
   (* Integers *)
@@ -113,7 +118,10 @@ rule next_token = parse
     }
 
   (* Anything else is a lexer error *)
-  | _ { raise (Lexing_error ("Unexpected character", Lexing.lexeme_start_p lexbuf)) }
+  (*line 118 returns the character/string that matched "_", and "^" concatenates strings*)
+  | _ {
+      let c = Lexing.lexeme lexbuf in
+      raise (Lexing_error ("Unexpected character: " ^ c, Lexing.lexeme_start_p lexbuf)) }
 
 {
 }
