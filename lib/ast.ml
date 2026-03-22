@@ -1,5 +1,5 @@
 type location = Lexing.position * Lexing.position
-and ident = { loc : location; id : string }
+and ident = { loc : location; id : string; pos : Lexing.position }
 and binop = Badd | Bmin | Bmul | Bdiv
 
 (* Simple const for expressions (no name) *)
@@ -20,9 +20,8 @@ and const_value =
   | Cbool of bool
   | Cfloat of float
   | Cexpr of expr
+  | Cempty
 
 and const_decl = { name : string; value : const_value; pos : Lexing.position }
-
-
 
 type program = { constants : const_decl list }

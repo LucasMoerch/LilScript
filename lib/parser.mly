@@ -35,12 +35,13 @@ const_lines:
 const_line:
   | IDENT COLON INT NEWLINE { 
     let start_pos = $startpos in
-    { name = $1; value = Cint $3; pos = start_pos } 
-  }
-  | IDENT COLON expr NEWLINE { 
-      let start_pos = $startpos in
-      { name = $1; value = Cexpr $3; pos = start_pos } 
-    }
+    { name = $1; value = Cint $3; pos = start_pos } }
+    
+  | IDENT COLON expr NEWLINE
+    { { name = $1; value = Cexpr $3; pos = $startpos } }
+
+  | IDENT COLON NEWLINE
+      { { name = $1; value = Cempty; pos = $startpos } }
 
 expr:
   | INT { Econst (SCint $1) }
@@ -53,7 +54,7 @@ expr:
   ;
 
 ident:
-  | id = IDENT { { loc = ($startpos, $endpos); id } }
+  | id = IDENT { { loc = ($startpos, $endpos); id; pos = $startpos } }
 ;
 
 %inline binop:                                     /*Binds the binary operation to binop*/
