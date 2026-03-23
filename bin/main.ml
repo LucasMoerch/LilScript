@@ -1,4 +1,3 @@
-(* Read an entire file into a single string *)
 let read_file path =
   let ic = open_in path in
   let buf = Buffer.create 1024 in
@@ -44,6 +43,8 @@ let rec string_of_expr = function
         | LilScript.Ast.Bdiv -> "/"
       in
       Printf.sprintf "%s %s %s" (string_of_expr e1) op_str (string_of_expr e2)
+  | LilScript.Ast.Elist es ->
+      "[" ^ String.concat ", " (List.map string_of_expr es) ^ "]"
 
 (* Pretty-print constant values from the AST *)
 let string_of_const_value = function
@@ -52,6 +53,16 @@ let string_of_const_value = function
   | LilScript.Ast.Cbool b -> string_of_bool b
   | LilScript.Ast.Cfloat f -> string_of_float f
   | LilScript.Ast.Cexpr e -> string_of_expr e
+  | LilScript.Ast.Cempty -> "<no value>"
+
+let string_of_key_name = function
+  | LilScript.Ast.Jump -> "JUMP"
+  | LilScript.Ast.Left -> "LEFT"
+  | LilScript.Ast.Right -> "RIGHT"
+
+let string_of_stmt = function
+  | LilScript.Ast.Keybinds kbs ->
+      "KEYS:\n" ^ String.concat "\n" (List.map (fun (kn, k) -> "  " ^ string_of_key_name kn ^ ": " ^ k) kbs)
 
 (* Simple evaluator for expressions *)
 let rec eval_expr env = function
@@ -64,7 +75,13 @@ let rec eval_expr env = function
   | LilScript.Ast.Evar id ->
       if Hashtbl.mem env id.LilScript.Ast.id then
         Hashtbl.find env id.LilScript.Ast.id
-      else failwith ("Unknown constant: " ^ id.LilScript.Ast.id)
+      else
+        let pos = id.LilScript.Ast.pos in
+        let line = pos.pos_lnum in
+        let col = pos.pos_cnum - pos.pos_bol + 1 in
+        Printf.eprintf "%s:%d:%d: Unknown constant '%s'\n%!" pos.pos_fname line
+          col id.LilScript.Ast.id;
+        exit 1
   | LilScript.Ast.Ebinop (op, e1, e2) -> (
       let v1 = eval_expr env e1 in
       let v2 = eval_expr env e2 in
@@ -83,23 +100,40 @@ let options : (string * Arg.spec * string) list =
   [
     ("--tokens", Arg.Set dump_tokens, "Print the token stream and exit");
     ("--ast", Arg.Set dump_ast, "Dump AST after parsing");
-  ];;
+  ]
 
 let set_file f = input_file := Some f
 
 let string_of_token = function
   | LilScript.Parser.CONSTANTS -> "CONSTANTS"
   | LilScript.Parser.COLON -> "COLON"
+  | LilScript.Parser.COMMA -> "COMMA"
+  | LilScript.Parser.LBRACKET -> "LBRACKET"
+  | LilScript.Parser.RBRACKET -> "RBRACKET"
   | LilScript.Parser.NEWLINE -> "NEWLINE"
   | LilScript.Parser.INDENT -> "INDENT"
   | LilScript.Parser.DEDENT -> "DEDENT"
   | LilScript.Parser.EOF -> "EOF"
   | LilScript.Parser.IDENT s -> "IDENT(" ^ s ^ ")"
   | LilScript.Parser.INT i -> "INT(" ^ string_of_int i ^ ")"
+  | LilScript.Parser.STRING s -> "STRING(" ^ s ^ ")"
   | LilScript.Parser.PLUS -> "PLUS"
   | LilScript.Parser.MINUS -> "MINUS"
   | LilScript.Parser.MULTIPLY -> "MULTIPLY"
   | LilScript.Parser.DIVIDE -> "DIVIDE"
+  | LilScript.Parser.FLOAT f -> "FLOAT(" ^ string_of_float f ^ ")"
+  | LilScript.Parser.LPAREN -> "LPAREN"
+  | LilScript.Parser.RPAREN -> "RPAREN"
+  | LilScript.Parser.ARENA -> "ARENA"
+  | LilScript.Parser.WIN -> "WIN"
+  | LilScript.Parser.LOSE -> "LOSE"
+  | LilScript.Parser.SPAWN -> "SPAWN"
+  | LilScript.Parser.PLAYERS -> "PLAYERS"
+  | LilScript.Parser.KEYS -> "KEYS"
+  | LilScript.Parser.JUMP -> "JUMP"
+  | LilScript.Parser.LEFT -> "LEFT"
+  | LilScript.Parser.RIGHT -> "RIGHT"
+
 
 (* Print tokens until EOF *)
 let rec print_tokens lexbuf =
@@ -150,6 +184,12 @@ let () =
             (string_of_const_value c.LilScript.Ast.value))
         ast.LilScript.Ast.constants;
 
+      Printf.printf "Parsed %d statements\n%!"
+        (List.length ast.LilScript.Ast.stmts);
+
+      List.iter
+        (fun s -> Printf.printf "%s\n%!" (string_of_stmt s))
+        ast.LilScript.Ast.stmts;
       (* Build environment for evaluation *)
       let env = Hashtbl.create 16 in
       List.iter
@@ -158,6 +198,9 @@ let () =
           | LilScript.Ast.Cint i ->
               Hashtbl.add env c.LilScript.Ast.name (float_of_int i)
           | LilScript.Ast.Cfloat f -> Hashtbl.add env c.LilScript.Ast.name f
+          | LilScript.Ast.Cexpr e ->
+              let v = eval_expr env e in
+              Hashtbl.add env c.LilScript.Ast.name v
           | _ -> ())
         ast.LilScript.Ast.constants;
 
@@ -167,10 +210,17 @@ let () =
         (fun c ->
           match c.LilScript.Ast.value with
           | LilScript.Ast.Cexpr e ->
-              Printf.printf "%s = %.0f\n%!" c.LilScript.Ast.name
+              Printf.printf "%s = %g\n%!" c.LilScript.Ast.name
                 (eval_expr env e)
           | LilScript.Ast.Cint i ->
               Printf.printf "%s = %d\n%!" c.LilScript.Ast.name i
+          | LilScript.Ast.Cempty ->
+              let pos = c.LilScript.Ast.pos in
+              let line = pos.pos_lnum in
+              let col = pos.pos_cnum - pos.pos_bol + 1 in
+              Printf.eprintf "%s:%d:%d: Constant '%s' has no value\n%!"
+                pos.pos_fname line col c.LilScript.Ast.name;
+              exit 1
           | _ -> ())
         ast.LilScript.Ast.constants
   with

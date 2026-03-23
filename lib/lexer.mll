@@ -25,9 +25,10 @@ let lowercase = String.lowercase_ascii
    - "constants" becomes the CONSTANTS token.
    - everything else becomes IDENT "<x>". *)
 let keyword_or_ident s =
-  match lowercase s with
+  let lower = lowercase s in
+  match lower with
   | "constants" -> CONSTANTS
-  | _ -> IDENT s
+  | _ -> IDENT lower        (* Normalize to lowercase *)
 
 (* Compare new indentation (n) with current indentation and enqueue INDENT/DEDENT
    - If n > current: we entered a new block -> push and emit INDENT token
@@ -53,7 +54,42 @@ let digit = ['0'-'9']
 let letter = ['a'-'z''A'-'Z''_']
 let ident = letter (letter|digit)*
 
-rule next_token = parse
+rule string_literal buf = parse
+  (* If we encounter a closing quote, the string is finished. Return the buffered text. *)
+  | '"' {
+      STRING (Buffer.contents buf)
+    }
+
+  (* Escaped double quote: keep a literal double quote inside the string. *)
+  | '\\' '"' {
+      Buffer.add_char buf '"';
+      string_literal buf lexbuf
+    }
+
+  (* Escaped backslash: keep a literal backslash inside the string. *)
+  | '\\' '\\' {
+      Buffer.add_char buf '\\';
+      string_literal buf lexbuf
+    }
+
+  (* Escaped newline: store it as an actual newline character. *)
+  | '\\' 'n' {
+      Buffer.add_char buf '\n';
+      string_literal buf lexbuf
+    }
+
+  (* EOF before a closing quote means the string is unterminated. *)
+  | eof {
+      raise (Lexing_error ("Unterminated string", Lexing.lexeme_start_p lexbuf))
+    }
+
+  (* Any other character belongs to the string unchanged. *)
+  | _ as c {
+      Buffer.add_char buf c;
+      string_literal buf lexbuf
+    }
+
+and next_token = parse
   (* Whitespace (spaces/tabs). Only meaningful at beginning of line (bol = true) *)
   | [' ' '\t']+ as ws {
       if !bol then (
@@ -90,11 +126,31 @@ rule next_token = parse
 
   (* Single-character tokens *)
   | ":" { bol := false; COLON }
-  | "+" { bol := false; PLUS}
-  | "-" { bol := false; MINUS}
-  | "*" { bol := false; MULTIPLY}
-  | "/" { bol := false; DIVIDE}
+  | "+" { bol := false; PLUS }
+  | "-" { bol := false; MINUS }
+  | "*" { bol := false; MULTIPLY }
+  | "/" { bol := false; DIVIDE }
+  | "[" { bol := false; LBRACKET }
+  | "]" { bol := false; RBRACKET }
+  | "," { bol := false; COMMA }
 
+  (* Keywords *)
+  | "arena" { ARENA }
+  | "win" { WIN }
+  | "lose" { LOSE }
+  | "spawn" { SPAWN }
+  | "players" { PLAYERS }
+  | "keys" { KEYS }
+  | "jump" { JUMP }
+  | "left" { LEFT }
+  | "right" { RIGHT }
+
+  (* Strings *)
+  | '"' { string_literal (Buffer.create 16) lexbuf }
+
+  (* Support for parentheses to allow grouped expressions like (2 + 3) *)
+  | "(" { bol := false; LPAREN }
+  | ")" { bol := false; RPAREN }
 
 
   (* Integers *)
@@ -104,7 +160,7 @@ rule next_token = parse
   | ident as s { bol := false; keyword_or_ident s }
 
   (* End of file: emit DEDENT tokens until we return to indentation level 0,
-     then  return EOF *)
+     then return EOF *)
   | eof {
       while Stack.top indent_stack > 0 do
         ignore (Stack.pop indent_stack);
@@ -115,7 +171,7 @@ rule next_token = parse
 
   (* Anything else is a lexer error *)
   (*line 118 returns the character/string that matched "_", and "^" concatenates strings*)
-  | _ { 
+  | _ {
       let c = Lexing.lexeme lexbuf in
       raise (Lexing_error ("Unexpected character: " ^ c, Lexing.lexeme_start_p lexbuf)) }
 

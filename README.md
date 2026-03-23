@@ -37,6 +37,10 @@ dune exec lilscriptc -- path/to/file.lil
 ```bash
 dune exec lilscriptc -- --tokens path/to/file.lil
 ```
+### Run in AST dump mode:
+```bash
+dune exec lilscriptc -- --ast path/to/file.lil
+```
 ## Running Tests
 
 To run the unit tests, make sure you have `ounit2` installed:
