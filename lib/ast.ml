@@ -1,6 +1,6 @@
 type location = Lexing.position * Lexing.position
 and ident = { loc : location; id : string; pos : Lexing.position }
-and binop = Badd | Bmin | Bmul | Bdiv
+type binop = Badd | Bmin | Bmul | Bdiv
 
 (* Simple const for expressions (no name) *)
 type simple_const =
@@ -9,10 +9,19 @@ type simple_const =
   | SCbool of bool
   | SCstring of string
 
+type key_name = 
+  | Jump
+  | Left
+  | Right
+type key = string
+
+type keybind = key_name * key
+
 and expr =
   | Econst of simple_const
   | Evar of ident
   | Ebinop of binop * expr * expr
+  | Elist of expr list
 
 and const_value =
   | Cint of int
@@ -22,6 +31,9 @@ and const_value =
   | Cexpr of expr
   | Cempty
 
+and stmt=
+  | Keybinds of keybind list
+
 and const_decl = { name : string; value : const_value; pos : Lexing.position }
 
-type program = { constants : const_decl list }
+type program = { constants : const_decl list; stmts : stmt list }

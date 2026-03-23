@@ -1,5 +1,5 @@
 constants:
-    MulTest:
+    MulTest: 2*3
     DivTest: 10 / 3
     AddTest: 21 + 21
     MinTest: 7-3
