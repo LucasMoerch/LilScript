@@ -19,8 +19,17 @@ open Ast
 %%
 
 program:
-  constants_block trailing_newlines EOF { { constants = $1 } }
-
+  constants_block trailing_newlines EOF {
+    {
+      constants = $1;
+      arena = {
+        width = 0;
+        height = 0;
+        tiles = [||];
+      };
+      players = [];
+    }
+  }
 trailing_newlines:
   /* empty */ { () }
 | NEWLINE trailing_newlines { () }
