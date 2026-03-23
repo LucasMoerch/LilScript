@@ -100,6 +100,7 @@ let string_of_token = function
   | LilScript.Parser.MINUS -> "MINUS"
   | LilScript.Parser.MULTIPLY -> "MULTIPLY"
   | LilScript.Parser.DIVIDE -> "DIVIDE"
+  | LilScript.Parser.FLOAT f -> "FLOAT(" ^ string_of_float f ^ ")"
   | LilScript.Parser.LPAREN -> "LPAREN"
   | LilScript.Parser.RPAREN -> "RPAREN"
 
@@ -169,7 +170,7 @@ let () =
         (fun c ->
           match c.LilScript.Ast.value with
           | LilScript.Ast.Cexpr e ->
-              Printf.printf "%s = %.0f\n%!" c.LilScript.Ast.name
+              Printf.printf "%s = %g\n%!" c.LilScript.Ast.name
                 (eval_expr env e)
           | LilScript.Ast.Cint i ->
               Printf.printf "%s = %d\n%!" c.LilScript.Ast.name i

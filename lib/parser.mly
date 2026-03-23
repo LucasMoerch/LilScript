@@ -8,6 +8,7 @@ open Ast
 %token NEWLINE INDENT DEDENT
 %token <string> IDENT
 %token <int> INT
+%token <float> FLOAT
 %token EOF
 
 //OPERATORS
@@ -42,12 +43,17 @@ const_line:
       let start_pos = $startpos in
       { name = $1; value = Cexpr $3; pos = start_pos }
     }
+  | IDENT COLON FLOAT NEWLINE {
+    let start_pos = $startpos in
+    { name = $1; value = Cfloat $3; pos = start_pos }
+  }
 
 (* Update the expression grammar by removing generic binop rule (expr o expr) because it breaks precedence
 , added explicit rules for each operator so precedence works correctly and
  added parentheses rule to allow grouping: (expr) *)
 expr:
   | INT { Econst (SCint $1) }
+  | FLOAT { Econst (SCfloat $1) }
   | id = ident { Evar id }
 
   | e1 = expr PLUS e2 = expr { Ebinop (Badd, e1, e2) }
