@@ -48,37 +48,36 @@ const_lines:
 
 const_line:
   | IDENT COLON INT NEWLINE {
-      let start_pos = $startpos in
-      { name = $1; value = Cint $3; pos = start_pos }
+      { name = $1; value = Cint $3; pos = $startpos }
     }
   | IDENT COLON FLOAT NEWLINE {
-      let start_pos = $startpos in
-      { name = $1; value = Cfloat $3; pos = start_pos }
+      { name = $1; value = Cfloat $3; pos = $startpos }
     }
   | IDENT COLON STRING NEWLINE {
-      let start_pos = $startpos in
-      { name = $1; value = Cstring $3; pos = start_pos }
+      { name = $1; value = Cstring $3; pos = $startpos }
     }
   | IDENT COLON expr NEWLINE {
-      let start_pos = $startpos in
-      { name = $1; value = Cexpr $3; pos = start_pos }
+      { name = $1; value = Cexpr $3; pos = $startpos }
+    }
+  | IDENT COLON NEWLINE {
+      { name = $1; value = Cempty; pos = $startpos }
     }
 
 (* Explicit operator rules for correct precedence, parens for grouping *)
 expr:
-  | INT                                          { Econst (SCint $1) }
-  | FLOAT                                        { Econst (SCfloat $1) }
-  | id = ident                                   { Evar id }
-  | e1 = expr PLUS e2 = expr                     { Ebinop (Badd, e1, e2) }
-  | e1 = expr MINUS e2 = expr                    { Ebinop (Bmin, e1, e2) }
-  | e1 = expr MULTIPLY e2 = expr                 { Ebinop (Bmul, e1, e2) }
-  | e1 = expr DIVIDE e2 = expr                   { Ebinop (Bdiv, e1, e2) }
-  | LPAREN e = expr RPAREN                       { e }
+  | INT                                               { Econst (SCint $1) }
+  | FLOAT                                             { Econst (SCfloat $1) }
+  | id = ident                                        { Evar id }
+  | e1 = expr PLUS e2 = expr                          { Ebinop (Badd, e1, e2) }
+  | e1 = expr MINUS e2 = expr                         { Ebinop (Bmin, e1, e2) }
+  | e1 = expr MULTIPLY e2 = expr                      { Ebinop (Bmul, e1, e2) }
+  | e1 = expr DIVIDE e2 = expr                        { Ebinop (Bdiv, e1, e2) }
+  | LPAREN e = expr RPAREN                            { e }
   | LBRACKET e = separated_list(COMMA, expr) RBRACKET { Elist e }
   ;
 
 ident:
-  | id = IDENT { { loc = ($startpos, $endpos); id } }
+  | id = IDENT { { loc = ($startpos, $endpos); id; pos = $startpos } }
   ;
 
 stmts:
