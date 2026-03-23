@@ -23,7 +23,6 @@ and const_value =
 
 and const_decl = { name : string; value : const_value; pos : Lexing.position }
 
-type program = { constants : const_decl list }
 
 type tile_kind =
   | Tsolid
@@ -43,8 +42,7 @@ type arena = {
 }
 
 type action =
-  | MoveUp
-  | MoveDown
+  | Jump
   | MoveLeft
   | MoveRight
 
@@ -53,14 +51,20 @@ type keybind = {
   action : action;
 }
 
+type rgb_color = {
+  red : int;
+  green : int;
+  blue : int;
+}
+
 type player = {
-  color : string;
+  color : rgb_color;
   spawn : position;
   keybinds : keybind list;
 }
 
 type program = {
   constants : const_decl list;
-  arena : arena option;
+  arena : arena;
   players : player list;
 }
