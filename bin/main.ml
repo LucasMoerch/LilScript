@@ -101,6 +101,8 @@ let string_of_token = function
   | LilScript.Parser.MULTIPLY -> "MULTIPLY"
   | LilScript.Parser.DIVIDE -> "DIVIDE"
   | LilScript.Parser.FLOAT f -> "FLOAT(" ^ string_of_float f ^ ")"
+  | LilScript.Parser.LPAREN -> "LPAREN"
+  | LilScript.Parser.RPAREN -> "RPAREN"
 
 (* Print tokens until EOF *)
 let rec print_tokens lexbuf =
