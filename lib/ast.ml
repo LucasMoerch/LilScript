@@ -35,4 +35,4 @@ and stmt=
 
 and const_decl = { name : string; value : const_value }
 
-type program = { constants : const_decl list }
+type program = { constants : const_decl list; stmts : stmt list }

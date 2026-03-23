@@ -1,6 +1,6 @@
 (* Read an entire file into a single string *)
 let read_file path =
-  let ic = open_in path in
+  let ic = open_in_bin path in
   (* Open file for reading *)
   let n = in_channel_length ic in
   (* Byte length *)
@@ -28,6 +28,8 @@ let rec string_of_expr = function
         | LilScript.Ast.Bdiv -> "/"
       in
       Printf.sprintf "%s %s %s" (string_of_expr e1) op_str (string_of_expr e2)
+  | LilScript.Ast.Elist es ->
+      "[" ^ String.concat ", " (List.map string_of_expr es) ^ "]"
 
 (* Pretty-print constant values from the AST *)
 let string_of_const_value = function
@@ -37,6 +39,15 @@ let string_of_const_value = function
   | LilScript.Ast.Cfloat f -> string_of_float f
   | LilScript.Ast.Cexpr e ->
       string_of_expr e
+
+let string_of_key_name = function
+  | LilScript.Ast.Jump -> "JUMP"
+  | LilScript.Ast.Left -> "LEFT"
+  | LilScript.Ast.Right -> "RIGHT"
+
+let string_of_stmt = function
+  | LilScript.Ast.Keybinds kbs ->
+      "KEYS:\n" ^ String.concat "\n" (List.map (fun (kn, k) -> "  " ^ string_of_key_name kn ^ ": " ^ k) kbs)
 
 (* Simple evaluator for expressions *)
 let rec eval_expr = function
@@ -64,16 +75,29 @@ let set_file f = input_file := Some f
 let string_of_token = function
   | LilScript.Parser.CONSTANTS -> "CONSTANTS"
   | LilScript.Parser.COLON -> "COLON"
+  | LilScript.Parser.COMMA -> "COMMA"
+  | LilScript.Parser.LBRACKET -> "LBRACKET"
+  | LilScript.Parser.RBRACKET -> "RBRACKET"
   | LilScript.Parser.NEWLINE -> "NEWLINE"
   | LilScript.Parser.INDENT -> "INDENT"
   | LilScript.Parser.DEDENT -> "DEDENT"
   | LilScript.Parser.EOF -> "EOF"
   | LilScript.Parser.IDENT s -> "IDENT(" ^ s ^ ")"
   | LilScript.Parser.INT i -> "INT(" ^ string_of_int i ^ ")"
+  | LilScript.Parser.STRING s -> "STRING(" ^ s ^ ")"
   | LilScript.Parser.PLUS -> "PLUS"
   | LilScript.Parser.MINUS -> "MINUS"
   | LilScript.Parser.MULTIPLY -> "MULTIPLY"
   | LilScript.Parser.DIVIDE -> "DIVIDE"
+  | LilScript.Parser.ARENA -> "ARENA"
+  | LilScript.Parser.WIN -> "WIN"
+  | LilScript.Parser.LOSE -> "LOSE"
+  | LilScript.Parser.SPAWN -> "SPAWN"
+  | LilScript.Parser.PLAYERS -> "PLAYERS"
+  | LilScript.Parser.KEYS -> "KEYS"
+  | LilScript.Parser.JUMP -> "JUMP"
+  | LilScript.Parser.LEFT -> "LEFT"
+  | LilScript.Parser.RIGHT -> "RIGHT"
 
 (* Print tokens until EOF *)
 let rec print_tokens lexbuf =
@@ -116,6 +140,13 @@ let () =
           Printf.printf "%s = %s\n%!" c.LilScript.Ast.name
             (string_of_const_value c.LilScript.Ast.value))
         ast.LilScript.Ast.constants;
+
+      Printf.printf "Parsed %d statements\n%!"
+        (List.length ast.LilScript.Ast.stmts);
+
+      List.iter
+        (fun s -> Printf.printf "%s\n%!" (string_of_stmt s))
+        ast.LilScript.Ast.stmts;
 
       (* Evaluate expressions *)
       Printf.printf "\nEvaluated:\n%!";

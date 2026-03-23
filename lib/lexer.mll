@@ -53,7 +53,42 @@ let digit = ['0'-'9']
 let letter = ['a'-'z''A'-'Z''_']
 let ident = letter (letter|digit)*
 
-rule next_token = parse
+rule string_literal buf = parse
+  (* If we encounter a closing quote, the string is finished. Return the buffered text. *)
+  | '"' {
+      STRING (Buffer.contents buf)
+    }
+
+  (* Escaped double quote: keep a literal double quote inside the string. *)
+  | '\\' '"' {
+      Buffer.add_char buf '"';
+      string_literal buf lexbuf
+    }
+
+  (* Escaped backslash: keep a literal backslash inside the string. *)
+  | '\\' '\\' {
+      Buffer.add_char buf '\\';
+      string_literal buf lexbuf
+    }
+
+  (* Escaped newline: store it as an actual newline character. *)
+  | '\\' 'n' {
+      Buffer.add_char buf '\n';
+      string_literal buf lexbuf
+    }
+
+  (* EOF before a closing quote means the string is unterminated. *)
+  | eof {
+      raise (Lexing_error ("Unterminated string", Lexing.lexeme_start_p lexbuf))
+    }
+
+  (* Any other character belongs to the string unchanged. *)
+  | _ as c {
+      Buffer.add_char buf c;
+      string_literal buf lexbuf
+    }
+
+and next_token = parse
   (* Whitespace (spaces/tabs). Only meaningful at beginning of line (bol = true) *)
   | [' ' '\t']+ as ws {
       if !bol then (
@@ -89,29 +124,27 @@ rule next_token = parse
 
   (* Single-character tokens *)
   | ":" { bol := false; COLON }
-  | "+" { bol := false; PLUS}
-  | "-" { bol := false; MINUS}
-  | "*" { bol := false; MULTIPLY}
-  | "/" { bol := false; DIVIDE}
-  | "[" { bol := false; LBRACKET}
-  | "]" { bol := false; RBRACKET}
-  | "," { bol := false; COMMA}
+  | "+" { bol := false; PLUS }
+  | "-" { bol := false; MINUS }
+  | "*" { bol := false; MULTIPLY }
+  | "/" { bol := false; DIVIDE }
+  | "[" { bol := false; LBRACKET }
+  | "]" { bol := false; RBRACKET }
+  | "," { bol := false; COMMA }
 
-  (*Keywords*)
-  | "arena"     { ARENA }
-  | "win"       { WIN }
-  | "lose"      { LOSE }
-  | "spawn"     { SPAWN }
-  | "players"   { PLAYERS }
-  | "keys"      { KEYS }
-  | "jump"      { JUMP }
-  | "left"      { LEFT }
-  | "right"     { RIGHT }
+  (* Keywords *)
+  | "arena" { ARENA }
+  | "win" { WIN }
+  | "lose" { LOSE }
+  | "spawn" { SPAWN }
+  | "players" { PLAYERS }
+  | "keys" { KEYS }
+  | "jump" { JUMP }
+  | "left" { LEFT }
+  | "right" { RIGHT }
 
-
-  (* Strings*)
-  | '"'        { string_literal (Buffer.create 16) lexbuf }
-
+  (* Strings *)
+  | '"' { string_literal (Buffer.create 16) lexbuf }
 
   (* Integers *)
   | digit+ as n { bol := false; INT (int_of_string n) }
@@ -120,7 +153,7 @@ rule next_token = parse
   | ident as s { bol := false; keyword_or_ident s }
 
   (* End of file: emit DEDENT tokens until we return to indentation level 0,
-     then  return EOF *)
+     then return EOF *)
   | eof {
       while Stack.top indent_stack > 0 do
         ignore (Stack.pop indent_stack);

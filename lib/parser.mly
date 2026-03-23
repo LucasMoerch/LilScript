@@ -23,7 +23,13 @@ open Keys
 %%
 
 program:
-  constants_block EOF { { constants = $1 } }
+  blocks EOF { { constants = fst $1; stmts = snd $1 } }
+
+blocks:
+  | constants_block { ($1, []) }
+  | stmts { ([], $1) }
+  | constants_block stmts { ($1, $2) }
+  | stmts constants_block { ($2, $1) }
 
 constants_block:
   CONSTANTS COLON NEWLINE INDENT const_lines DEDENT { $5 }
@@ -34,7 +40,12 @@ const_lines:
 
 const_line:
   | IDENT COLON INT NEWLINE { { name = $1; value = Cint $3 } }
+  | IDENT COLON STRING NEWLINE { { name = $1; value = Cstring $3 } }
   | IDENT COLON expr NEWLINE { { name = $1; value = Cexpr $3 } }
+
+stmts:
+  | stmt { [$1] }
+  | stmts stmt { $1 @ [$2] }
 
 expr:
   | INT { Econst (SCint $1) }
