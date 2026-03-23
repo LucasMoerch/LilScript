@@ -97,13 +97,13 @@ keybind_list:
 
 %inline key_name:
   | JUMP  { Jump }
-  | LEFT  { Left }
-  | RIGHT { Right }
+  | LEFT  { MoveLeft }
+  | RIGHT { MoveRight }
 
 keybind:
   | key_name COLON IDENT NEWLINE {
       if is_valid_key $3 then
-        ($1, $3)
+        { action = $1; key = $3 }
       else
         failwith ("Invalid key: " ^ $3)
     }

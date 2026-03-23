@@ -22,6 +22,9 @@ let rec print_expr level expr =
       Printf.printf "%sEbinop %s\n" (indent level) op_str;
       print_expr (level + 1) left;
       print_expr (level + 1) right
+  | Elist exprs ->
+      Printf.printf "%sElist\n" (indent level);
+      List.iter (print_expr (level + 1)) exprs
 
 let print_const level c =
   Printf.printf "%sConstant %s\n" (indent level) c.name;

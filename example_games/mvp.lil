@@ -1,4 +1,3 @@
-ssdsd:
+Constants:
     gravity: 10   // test comment
-    jump: 14 * 2
-    power:
+    power: 2
