@@ -27,7 +27,10 @@ open Keys
 %%
 
 program:
-  blocks trailing_newlines EOF { { constants = fst $1; stmts = snd $1 } }
+  blocks trailing_newlines EOF {
+    let (constants, stmts) = $1 in
+    { constants; stmts; arena = None; players = [] }
+  }
 
 trailing_newlines:
   | /* empty */ { () }

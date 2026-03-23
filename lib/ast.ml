@@ -36,4 +36,49 @@ and stmt=
 
 and const_decl = { name : string; value : const_value; pos : Lexing.position }
 
-type program = { constants : const_decl list; stmts : stmt list }
+
+type tile_kind =
+  | Tsolid
+  | Twin
+  | Tlose
+  | Tempty
+
+type position = {
+  x : int;
+  y : int;
+}
+
+type arena = {
+  width : int;
+  height : int;
+  tiles : tile_kind array array;
+}
+
+type action =
+  | Jump
+  | MoveLeft
+  | MoveRight
+
+type keybind = {
+  key : string;
+  action : action;
+}
+
+type rgb_color = {
+  red : int;
+  green : int;
+  blue : int;
+}
+
+type player = {
+  color : rgb_color;
+  spawn : position;
+  keybinds : keybind list;
+}
+
+type program = {
+  constants : const_decl list;
+  arena : arena;
+  players : player list;
+  stmts : stmt list
+}
