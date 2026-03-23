@@ -7,6 +7,7 @@ open Ast
 %token NEWLINE INDENT DEDENT
 %token <string> IDENT
 %token <int> INT
+%token <float> FLOAT
 %token EOF
 
 //OPERATORS
@@ -41,9 +42,14 @@ const_line:
       let start_pos = $startpos in
       { name = $1; value = Cexpr $3; pos = start_pos }
     }
+  | IDENT COLON FLOAT NEWLINE {
+    let start_pos = $startpos in
+    { name = $1; value = Cfloat $3; pos = start_pos }
+  }
 
 expr:
   | INT { Econst (SCint $1) }
+  | FLOAT { Econst (SCfloat $1) }
   | e1 = expr PLUS e2 = expr { Ebinop (Badd, e1, e2) }
   | e1 = expr MINUS e2 = expr { Ebinop (Bmin, e1, e2) }
   | id = ident /*Variables*/
