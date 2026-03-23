@@ -33,6 +33,6 @@ and const_value =
 and stmt=
   | Keybinds of keybind list
 
-and const_decl = { name : string; value : const_value }
+and const_decl = { name : string; value : const_value; pos : Lexing.position }
 
 type program = { constants : const_decl list; stmts : stmt list }
