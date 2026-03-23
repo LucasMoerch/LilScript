@@ -1,14 +1,14 @@
-(* Read an entire file into a single string *)
 let read_file path =
-  let ic = open_in_bin path in
-  (* Open file for reading *)
-  let n = in_channel_length ic in
-  (* Byte length *)
-  let s = really_input_string ic n in
-  (* Read exactly n bytes into a string *)
+  let ic = open_in path in
+  let buf = Buffer.create 1024 in
+  (try
+     while true do
+       Buffer.add_string buf (input_line ic);
+       Buffer.add_char buf '\n'
+     done
+   with End_of_file -> ());
   close_in ic;
-  (* Always close the channel *)
-  s
+  Buffer.contents buf
 
 (* Pretty-print expressions *)
 let rec string_of_expr = function
