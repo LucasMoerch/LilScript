@@ -33,6 +33,9 @@ let print_const level c =
   | Cexpr e ->
       Printf.printf "%sCexpr\n" (indent (level + 1));
       print_expr (level + 2) e
+  | Cempty ->
+      Printf.printf "%sCempty\n" (indent (level + 1))
+
 
 let dump program =
   Printf.printf "Program\n";

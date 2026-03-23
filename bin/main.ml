@@ -72,7 +72,6 @@ let rec eval_expr env = function
         Printf.eprintf "%s:%d:%d: Unknown constant '%s'\n%!" pos.pos_fname line
           col id.LilScript.Ast.id;
         exit 1
-      else failwith ("Unknown constant: " ^ id.LilScript.Ast.id)
   | LilScript.Ast.Ebinop (op, e1, e2) -> (
       let v1 = eval_expr env e1 in
       let v2 = eval_expr env e2 in
