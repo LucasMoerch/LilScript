@@ -1,0 +1,3 @@
+constants:
+    StringTest: "Hello world"
+    ListTest: [8,2,1,3]
