@@ -18,10 +18,16 @@ LilScript is a small Domain Specfic Language implemented in OCaml (ocamllex + Me
 - OCaml 4.13.1 (or compatible)
 - Dune 3.21.1
 - Menhir installed in the same environment as Dune/OCaml
+- Python
+- Pygame-ce
 
 To install menhir with opam:
 ```bash
 opam install menhir
+```
+to install python-ce with pip:
+```bash
+python -m pip install pygame-ce
 ```
 ## Build
 ```bash
