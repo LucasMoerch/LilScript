@@ -19,6 +19,13 @@ let bol = ref true
 (* Initialize indentation stack with indent level 0 *)
 let () = Stack.push 0 indent_stack
 
+let reset () =
+  Stack.clear indent_stack;
+  Stack.push 0 indent_stack;
+  Queue.clear pending;
+  bol := true
+
+
 let lowercase = String.lowercase_ascii
 
 (* Recognize keywords vs identifiers.
@@ -51,6 +58,7 @@ let emit_indent_tokens n lexbuf =
 
 (* ocamllex regexp definitions go here, outside the OCAML header block *)
 let digit = ['0'-'9']
+let float_lit= digit+ '.' digit* 	
 let letter = ['a'-'z''A'-'Z''_']
 let ident = letter (letter|digit)*
 
@@ -152,7 +160,7 @@ and next_token = parse
   | "(" { bol := false; LPAREN }
   | ")" { bol := false; RPAREN }
 
-
+  | float_lit as f { bol := false; FLOAT (float_of_string f) }
   (* Integers *)
   | digit+ as n { bol := false; INT (int_of_string n) }
 
