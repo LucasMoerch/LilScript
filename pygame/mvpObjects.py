@@ -1,4 +1,6 @@
 import pygame
+from player import Player, Keys
+from settings import Settings
 
 # Create custom keys
 # the current valid_keys should work with the documentation of pygame.key.key_code -- else key.pyi has the anwsers

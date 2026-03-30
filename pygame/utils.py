@@ -1,6 +1,7 @@
 import pygame
 from player import Player, Keys
 from settings import Settings
+from block import Block
 # Create custom keys
 # the current valid_keys should work with the documentation of pygame.key.key_code -- else key.pyi has the anwsers
 
@@ -25,6 +26,14 @@ def create_settings(jumpHeightInput, gravityInput, speedInput, timeInput, tickSp
         gravity = gravityInput,           #Custom gravity const (float)
         speed = speedInput,               #Custom speed const (float)
         time = timeInput,                 #Custom time count (int)
-        tickSpeed = tickSpeedInput,       #Custom tickspeed (FPS) - (float)
+        tickSpeed = tickSpeedInput        #Custom tickspeed (FPS) - (float)
     )
     return settings
+
+def create_block (xInput,yInput, blockTypeInput):
+    block = Block(
+        x = xInput,
+        y = yInput,
+        blockType = blockTypeInput
+    )
+    return block
