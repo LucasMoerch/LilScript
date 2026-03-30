@@ -75,7 +75,57 @@ let test_COLON _ =
   let tok = LilScript.Lexer.next_token lexbuf in
   assert_equal COLON tok
 
-(* Test suite *)
+let test_FLOAT _ =
+  let lexbuf = Lexing.from_string "3.14" in
+  let tok = LilScript.Lexer.next_token lexbuf in
+  assert_equal (FLOAT 3.14) tok
+
+
+let test_NEWLINE_rn _ =
+  LilScript.Lexer.reset();
+  let lexbuf = Lexing.from_string "\r\n" in
+  let tok = LilScript.Lexer.next_token lexbuf in
+  assert_equal NEWLINE tok
+
+let test_NEWLINE_r _ =
+  LilScript.Lexer.reset ();
+  let lexbuf = Lexing.from_string "\r" in
+  let tok = LilScript.Lexer.next_token lexbuf in
+  assert_equal NEWLINE tok
+
+let test_NEWLINE_n _ =
+  LilScript.Lexer.reset ();
+  let lexbuf = Lexing.from_string "\n" in
+  let tok = LilScript.Lexer.next_token lexbuf in
+  assert_equal NEWLINE tok
+
+let test_COMMENT _ =
+  let lexbuf = Lexing.from_string "//hello world" in 
+  let tok = LilScript.Lexer.next_token lexbuf in 
+  assert_equal EOF tok
+
+let test_EMPTYSTRING _ =
+  LilScript.Lexer.reset ();
+  let lexbuf = Lexing.from_string "" in 
+  let tok = LilScript.Lexer.next_token lexbuf in 
+  assert_equal EOF tok
+
+
+let test_EOF_dedent _ =
+  LilScript.Lexer.reset ();
+  Stack.push 4 LilScript.Lexer.indent_stack;
+  let lexbuf = Lexing.from_string "" in
+  let tok = LilScript.Lexer.next_token lexbuf in
+  assert_equal DEDENT tok
+
+let test_Lexingerror _ =
+  LilScript.Lexer.reset ();
+  let lexbuf = Lexing.from_string "@" in
+  assert_raises 
+  (LilScript.Lexer.Lexing_error ("Unexpected character: @", Lexing.lexeme_start_p lexbuf))
+    (fun () -> LilScript.Lexer.next_token lexbuf)
+
+  (* Test suite *)
 let suite =
   "Lexer tests"
   >::: [
@@ -91,6 +141,15 @@ let suite =
          "MULTIPLY" >:: test_MULTIPLY;
          "DIVIDE" >:: test_DIVIDE;
          "COLON" >:: test_COLON;
+         "FLOAT" >:: test_FLOAT;
+         "NEWLINE" >:: test_NEWLINE_rn;
+         "NEWLINE" >:: test_NEWLINE_r;
+         "NEWLINE" >:: test_NEWLINE_n;
+         "EOF" >:: test_COMMENT;
+         "EOF" >:: test_EMPTYSTRING;
+         "EOF" >:: test_EOF_dedent;
+         "fun" >:: test_Lexingerror;
+
        ]
 
 (* Run the suite *)
