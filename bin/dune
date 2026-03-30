@@ -1,5 +1,5 @@
 (executable
  (name main)
  (public_name lilscriptc)
- (modules main)
- (libraries LilScript))
+ (libraries LilScript)
+ (modules main file_io diagnostics pretty eval))

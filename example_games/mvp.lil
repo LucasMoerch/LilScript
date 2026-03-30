@@ -1,3 +1,30 @@
-Constants:
-    gravity: 10   // test comment
-    power: 2
+tile_size: 32
+
+constants:
+  hello: 42
+  whoa: 2.5
+  name: "saleeem"
+  empty: // Test empty
+
+players:
+  p1:
+    color: 255 80 80
+    spawn: 2 2
+    keys:
+      JUMP: "space"
+      LEFT: "left"
+      RIGHT: "right"
+
+  p2:
+    color: 80 255 80
+    spawn: 10 20
+    keys:
+      JUMP: "w"
+      LEFT: "a"
+      RIGHT: "d"
+
+arena: [
+  [0, 1, 1],
+  [0, 0, 2],
+  [0, 0, 3],
+]

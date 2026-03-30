@@ -26,7 +26,7 @@ let rec print_expr level expr =
       Printf.printf "%sElist\n" (indent level);
       List.iter (print_expr (level + 1)) exprs
 
-let print_const level c =
+let print_const level (c : const_decl) =
   Printf.printf "%sConstant %s\n" (indent level) c.name;
   match c.value with
   | Cint i -> Printf.printf "%sCint %d\n" (indent (level + 1)) i
@@ -36,10 +36,42 @@ let print_const level c =
   | Cexpr e ->
       Printf.printf "%sCexpr\n" (indent (level + 1));
       print_expr (level + 2) e
-  | Cempty ->
-      Printf.printf "%sCempty\n" (indent (level + 1))
+  | Cempty -> Printf.printf "%sCempty\n" (indent (level + 1))
 
+let print_keybind level { action; key } =
+  let action_str =
+    match action with
+    | Jump -> "Jump"
+    | MoveLeft -> "MoveLeft"
+    | MoveRight -> "MoveRight"
+  in
+  Printf.printf "%sKeybind %s -> %s\n" (indent level) action_str key
+
+let print_player level (p : player) =
+  Printf.printf "%sPlayer %s\n" (indent level) p.name;
+  Printf.printf "%sColor (%d, %d, %d)\n"
+    (indent (level + 1))
+    p.color.red p.color.green p.color.blue;
+  Printf.printf "%sSpawn (%d, %d)\n" (indent (level + 1)) p.spawn.x p.spawn.y;
+  List.iter (print_keybind (level + 1)) p.keybinds
+
+let string_of_tile_kind = function
+  | Tsolid -> "Tsolid"
+  | Twin -> "Twin"
+  | Tlose -> "Tlose"
+  | Tempty -> "Tempty"
+
+let print_arena level arena =
+  Printf.printf "%sArena %dx%d\n" (indent level) arena.width arena.height;
+  Array.iter
+    (fun row ->
+      Printf.printf "%s[%s]\n"
+        (indent (level + 1))
+        (String.concat "; " (Array.to_list (Array.map string_of_tile_kind row))))
+    arena.tiles
 
 let dump program =
   Printf.printf "Program\n";
-  List.iter (print_const 1) program.constants
+  List.iter (print_const 1) program.constants;
+  List.iter (print_player 1) program.players;
+  match program.arena with Some arena -> print_arena 1 arena | None -> ()
