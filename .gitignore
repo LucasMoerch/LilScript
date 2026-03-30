@@ -1,3 +1,6 @@
 # .gitignore
 _build/
 .env
+__pycache__/
+*.pyc
+
