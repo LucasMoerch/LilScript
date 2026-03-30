@@ -1,21 +1,23 @@
 type location = Lexing.position * Lexing.position
 and ident = { loc : location; id : string; pos : Lexing.position }
+
 type binop = Badd | Bmin | Bmul | Bdiv
 
-(* Simple const for expressions (no name) *)
 type simple_const =
   | SCint of int
   | SCfloat of float
   | SCbool of bool
   | SCstring of string
 
-type key_name = 
+type action =
   | Jump
-  | Left
-  | Right
-type key = string
+  | MoveLeft
+  | MoveRight
 
-type keybind = key_name * key
+type keybind = {
+  action : action;
+  key    : string;
+}
 
 and expr =
   | Econst of simple_const
@@ -31,11 +33,10 @@ and const_value =
   | Cexpr of expr
   | Cempty
 
-and stmt=
+and stmt =
   | Keybinds of keybind list
 
 and const_decl = { name : string; value : const_value; pos : Lexing.position }
-
 
 type tile_kind =
   | Tsolid
@@ -43,42 +44,25 @@ type tile_kind =
   | Tlose
   | Tempty
 
-type position = {
-  x : int;
-  y : int;
-}
+type position = { x : int; y : int }
 
 type arena = {
-  width : int;
+  width  : int;
   height : int;
-  tiles : tile_kind array array;
+  tiles  : tile_kind array array;
 }
 
-type action =
-  | Jump
-  | MoveLeft
-  | MoveRight
-
-type keybind = {
-  key : string;
-  action : action;
-}
-
-type rgb_color = {
-  red : int;
-  green : int;
-  blue : int;
-}
+type rgb_color = { red : int; green : int; blue : int }
 
 type player = {
-  color : rgb_color;
-  spawn : position;
+  color    : rgb_color;
+  spawn    : position;
   keybinds : keybind list;
 }
 
 type program = {
   constants : const_decl list;
-  arena : arena;
-  players : player list;
-  stmts : stmt list
+  arena     : arena option;
+  players   : player list;
+  stmts     : stmt list;
 }

@@ -57,12 +57,13 @@ let string_of_const_value = function
 
 let string_of_key_name = function
   | LilScript.Ast.Jump -> "JUMP"
-  | LilScript.Ast.Left -> "LEFT"
-  | LilScript.Ast.Right -> "RIGHT"
+  | LilScript.Ast.MoveLeft -> "LEFT"
+  | LilScript.Ast.MoveRight -> "RIGHT"
 
 let string_of_stmt = function
   | LilScript.Ast.Keybinds kbs ->
-      "KEYS:\n" ^ String.concat "\n" (List.map (fun (kn, k) -> "  " ^ string_of_key_name kn ^ ": " ^ k) kbs)
+      "KEYS:\n" ^ String.concat "\n" (List.map (fun { LilScript.Ast.action; key } -> "  " ^ string_of_key_name action ^ ": " ^ key) kbs
+)
 
 (* Simple evaluator for expressions *)
 let rec eval_expr env = function
@@ -90,6 +91,8 @@ let rec eval_expr env = function
       | LilScript.Ast.Bmin -> v1 -. v2
       | LilScript.Ast.Bmul -> v1 *. v2
       | LilScript.Ast.Bdiv -> v1 /. v2)
+  | LilScript.Ast.Elist _ ->
+      failwith "List values cannot be used in arithmetic expressions"
 
 (* Flag for token dumping *)
 let dump_tokens = ref false
