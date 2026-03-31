@@ -3,3 +3,8 @@
  (public_name lilscriptc)
  (modules main)
  (libraries LilScript))
+
+(executable
+(name arena_editor)
+(libraries LilScript notty notty.unix))
+
