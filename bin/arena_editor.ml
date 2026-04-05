@@ -8,6 +8,7 @@ type tile =
   | Wall
   | Spawn
   | Goal
+  | Lose
 
 type arena = {
   width : int;
@@ -29,6 +30,7 @@ let char_of_tile = function
   | Wall -> '#'
   | Spawn -> 'S'
   | Goal -> 'G'
+  | Lose -> 'L'
 
 let set_tile editor tile =
   let { arena; cursor_x; cursor_y; _ } = editor in
@@ -59,7 +61,7 @@ let draw editor =
 
   let help =
     I.string A.empty
-      "Arrows: move | 1:Wall 2:Empty 3:Spawn 4:Goal | S:save Q:quit"
+      "Arrows: move | 1:Wall 2:Empty 3:Spawn 4:Goal 5:Lose| S:save Q:quit"
   in
 
   I.vcat [grid_image; I.void 1 1; help]
@@ -95,7 +97,7 @@ let handle_input editor = function
   | `ASCII '2' -> set_tile editor Empty
   | `ASCII '3' -> set_tile editor Spawn
   | `ASCII '4' -> set_tile editor Goal
-
+  | `ASCII '5' -> set_tile editor Lose
   | `ASCII 's' | `ASCII 'S' ->
       save_arena editor;
       editor
