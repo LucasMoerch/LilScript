@@ -1,5 +1,12 @@
 (executable
  (name main)
  (public_name lilscriptc)
+ (modules main)
+ (libraries LilScript))
+
+(executable
+(name arena_editor)
+(libraries LilScript notty notty.unix))
+
  (libraries LilScript)
  (modules main file_io diagnostics pretty eval))
