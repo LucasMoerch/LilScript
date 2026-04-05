@@ -8,3 +8,5 @@
 (name arena_editor)
 (libraries LilScript notty notty.unix))
 
+ (libraries LilScript)
+ (modules main file_io diagnostics pretty eval))

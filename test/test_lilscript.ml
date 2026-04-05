@@ -3,47 +3,47 @@ open LilScript.Parser
 
 (* Existing tests *)
 let test_keyword_or_ident_constants _ =
-  assert_equal CONSTANTS (LilScript.Lexer.keyword_or_ident "constants")
+  assert_equal CONSTANTS (LilScript.Lexer_utils.keyword_or_ident "constants")
 
 let test_keyword_or_ident_other _ =
-  assert_equal (IDENT "foo") (LilScript.Lexer.keyword_or_ident "foo")
+  assert_equal (IDENT "foo") (LilScript.Lexer_utils.keyword_or_ident "foo")
 
 (* New test for case insensitivity *)
 let test_keyword_or_ident_uppercase _ =
-  assert_equal CONSTANTS (LilScript.Lexer.keyword_or_ident "CONSTANTS");
-  assert_equal CONSTANTS (LilScript.Lexer.keyword_or_ident "Constants");
-  assert_equal CONSTANTS (LilScript.Lexer.keyword_or_ident "cOnStAnTs")
+  assert_equal CONSTANTS (LilScript.Lexer_utils.keyword_or_ident "CONSTANTS");
+  assert_equal CONSTANTS (LilScript.Lexer_utils.keyword_or_ident "Constants");
+  assert_equal CONSTANTS (LilScript.Lexer_utils.keyword_or_ident "cOnStAnTs")
 
 (* Test 1: n > current → should add INDENT *)
 let test_emit_indent _ =
-  Stack.clear LilScript.Lexer.indent_stack;
-  Stack.push 0 LilScript.Lexer.indent_stack;
-  Queue.clear LilScript.Lexer.pending;
+  Stack.clear LilScript.Lexer_utils.indent_stack;
+  Stack.push 0 LilScript.Lexer_utils.indent_stack;
+  Queue.clear LilScript.Lexer_utils.pending;
   let lexbuf = Lexing.from_string "" in
-  LilScript.Lexer.emit_indent_tokens 4 lexbuf;
-  assert_equal INDENT (Queue.take LilScript.Lexer.pending)
+  LilScript.Lexer_utils.emit_indent_tokens 4 lexbuf;
+  assert_equal INDENT (Queue.take LilScript.Lexer_utils.pending)
 
 (* Test 2: n < current → should add DEDENT *)
 let test_emit_dedent _ =
-  Stack.clear LilScript.Lexer.indent_stack;
-  Stack.push 0 LilScript.Lexer.indent_stack;
-  Stack.push 4 LilScript.Lexer.indent_stack;
-  Queue.clear LilScript.Lexer.pending;
+  Stack.clear LilScript.Lexer_utils.indent_stack;
+  Stack.push 0 LilScript.Lexer_utils.indent_stack;
+  Stack.push 4 LilScript.Lexer_utils.indent_stack;
+  Queue.clear LilScript.Lexer_utils.pending;
   let lexbuf = Lexing.from_string "" in
-  LilScript.Lexer.emit_indent_tokens 0 lexbuf;
-  assert_equal DEDENT (Queue.take LilScript.Lexer.pending)
+  LilScript.Lexer_utils.emit_indent_tokens 0 lexbuf;
+  assert_equal DEDENT (Queue.take LilScript.Lexer_utils.pending)
 
 (* Test 3: bad indentation → should raise Lexing_error *)
 let test_emit_bad_indent _ =
-  Stack.clear LilScript.Lexer.indent_stack;
-  Stack.push 0 LilScript.Lexer.indent_stack;
-  Stack.push 4 LilScript.Lexer.indent_stack;
-  Queue.clear LilScript.Lexer.pending;
+  Stack.clear LilScript.Lexer_utils.indent_stack;
+  Stack.push 0 LilScript.Lexer_utils.indent_stack;
+  Stack.push 4 LilScript.Lexer_utils.indent_stack;
+  Queue.clear LilScript.Lexer_utils.pending;
   let lexbuf = Lexing.from_string "" in
   assert_raises
-    (LilScript.Lexer.Lexing_error
+    (LilScript.Lexer_utils.Lexing_error
        ("Indentation error", Lexing.lexeme_start_p lexbuf))
-    (fun () -> LilScript.Lexer.emit_indent_tokens 2 lexbuf)
+    (fun () -> LilScript.Lexer_utils.emit_indent_tokens 2 lexbuf)
 
 let test_int _ =
   let lexbuf = Lexing.from_string "42" in

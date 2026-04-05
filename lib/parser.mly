@@ -1,6 +1,7 @@
 %{
 open Ast
 open Keys
+open Arena
 %}
 
 %token LPAREN RPAREN
@@ -13,97 +14,232 @@ open Keys
 %token <float> FLOAT
 %token EOF
 
-//OPERATORS
 %token PLUS MINUS MULTIPLY DIVIDE
 
 %left PLUS MINUS
 %left MULTIPLY DIVIDE
 
-//Keywords
-%token ARENA WIN LOSE SPAWN PLAYERS
+%token ARENA SPAWN PLAYERS COLOR
 %token KEYS JUMP LEFT RIGHT
 
 %start <Ast.program> program
+
 %%
 
 program:
-  blocks trailing_newlines EOF {
-    let (constants, stmts) = $1 in
-    { constants; stmts; arena = None; players = [] }
-  }
+  separators
+  root_constants
+  constants_block_opt
+  players_block_opt
+  arena_block_opt
+  top_keybinds_opt
+  separators
+  EOF
+    {
+      let constants = $2 @ $3 in
+      { constants; players = $4; arena = $5; stmts = $6 }
+    }
+;
 
-trailing_newlines:
+separators:
   | /* empty */ { () }
-  | NEWLINE trailing_newlines { () }
+  | separator separators { () }
+;
 
-blocks:
-  | constants_block             { ($1, []) }
-  | stmts                       { ([], $1) }
-  | constants_block stmts       { ($1, $2) }
-  | stmts constants_block       { ($2, $1) }
+separator:
+  | NEWLINE { () }
+  | DEDENT { () }
+;
 
-constants_block:
-  CONSTANTS COLON NEWLINE INDENT const_lines DEDENT { $5 }
+header_colon:
+  | COLON { () }
+  | separators COLON { () }
+;
+
+root_constants:
+  | /* empty */ { [] }
+  | root_constant root_constants { $1 :: $2 }
+  | separator root_constants { $2 }
+;
+
+root_constant:
+  | IDENT COLON INT NEWLINE
+    { { name = $1; value = Cint $3; pos = $startpos } }
+  | IDENT COLON FLOAT NEWLINE
+    { { name = $1; value = Cfloat $3; pos = $startpos } }
+  | IDENT COLON STRING NEWLINE
+    { { name = $1; value = Cstring $3; pos = $startpos } }
+  | IDENT COLON expr NEWLINE
+    { { name = $1; value = Cexpr $3; pos = $startpos } }
+  | IDENT COLON NEWLINE
+    { { name = $1; value = Cempty; pos = $startpos } }
+;
+
+constants_block_opt:
+  | /* empty */ { [] }
+  | CONSTANTS header_colon NEWLINE INDENT const_lines DEDENT separators
+    { $5 }
+;
 
 const_lines:
   | /* empty */ { [] }
   | const_line const_lines { $1 :: $2 }
+  | NEWLINE const_lines { $2 }
+;
 
 const_line:
-  | IDENT COLON INT NEWLINE {
-      { name = $1; value = Cint $3; pos = $startpos }
+  | IDENT COLON INT NEWLINE
+    { { name = $1; value = Cint $3; pos = $startpos } }
+  | IDENT COLON FLOAT NEWLINE
+    { { name = $1; value = Cfloat $3; pos = $startpos } }
+  | IDENT COLON STRING NEWLINE
+    { { name = $1; value = Cstring $3; pos = $startpos } }
+  | IDENT COLON expr NEWLINE
+    { { name = $1; value = Cexpr $3; pos = $startpos } }
+  | IDENT COLON NEWLINE
+    { { name = $1; value = Cempty; pos = $startpos } }
+;
+
+players_block_opt:
+  | /* empty */ { [] }
+  | PLAYERS header_colon NEWLINE INDENT player_lines DEDENT separators
+    { $5 }
+;
+
+player_lines:
+  | /* empty */ { [] }
+  | player_decl player_lines { $1 :: $2 }
+  | NEWLINE player_lines { $2 }
+;
+
+player_decl:
+  | IDENT COLON NEWLINE INDENT player_fields DEDENT
+    {
+      let (color, spawn, keybinds) = $5 in
+      { name = $1; color; spawn; keybinds }
     }
-  | IDENT COLON FLOAT NEWLINE {
-      { name = $1; value = Cfloat $3; pos = $startpos }
-    }
-  | IDENT COLON STRING NEWLINE {
-      { name = $1; value = Cstring $3; pos = $startpos }
-    }
-  | IDENT COLON expr NEWLINE {
-      { name = $1; value = Cexpr $3; pos = $startpos }
-    }
-  | IDENT COLON NEWLINE {
-      { name = $1; value = Cempty; pos = $startpos }
-    }
+;
 
-(* Explicit operator rules for correct precedence, parens for grouping *)
-expr:
-  | INT                                               { Econst (SCint $1) }
-  | FLOAT                                             { Econst (SCfloat $1) }
-  | id = ident                                        { Evar id }
-  | e1 = expr PLUS e2 = expr                          { Ebinop (Badd, e1, e2) }
-  | e1 = expr MINUS e2 = expr                         { Ebinop (Bmin, e1, e2) }
-  | e1 = expr MULTIPLY e2 = expr                      { Ebinop (Bmul, e1, e2) }
-  | e1 = expr DIVIDE e2 = expr                        { Ebinop (Bdiv, e1, e2) }
-  | LPAREN e = expr RPAREN                            { e }
-  | LBRACKET e = separated_list(COMMA, expr) RBRACKET { Elist e }
-  ;
+player_fields:
+  | color_field spawn_field keys_field { ($1, $2, $3) }
+  | color_field keys_field spawn_field { ($1, $3, $2) }
+  | spawn_field color_field keys_field { ($2, $1, $3) }
+  | spawn_field keys_field color_field { ($3, $1, $2) }
+  | keys_field color_field spawn_field { ($2, $3, $1) }
+  | keys_field spawn_field color_field { ($3, $2, $1) }
+;
 
-ident:
-  | id = IDENT { { loc = ($startpos, $endpos); id; pos = $startpos } }
-  ;
+color_field:
+  | COLOR COLON INT INT INT NEWLINE
+    { { red = $3; green = $4; blue = $5 } }
+;
 
-stmts:
-  | stmt        { [$1] }
-  | stmts stmt  { $1 @ [$2] }
+spawn_field:
+  | SPAWN COLON INT INT NEWLINE
+    { { x = $3; y = $4 } }
+;
 
-stmt:
-  | KEYS COLON NEWLINE INDENT keybind_list DEDENT
-      { Keybinds $5 }
+keys_field:
+  | KEYS COLON NEWLINE INDENT keybind_lines DEDENT
+    { $5 }
+;
 
-keybind_list:
-  | keybind               { [$1] }
-  | keybind_list keybind  { $1 @ [$2] }
+keybind_lines:
+  | /* empty */ { [] }
+  | keybind keybind_lines { $1 :: $2 }
+  | NEWLINE keybind_lines { $2 }
+;
 
-%inline key_name:
-  | JUMP  { Jump }
-  | LEFT  { MoveLeft }
+key_name:
+  | JUMP { Jump }
+  | LEFT { MoveLeft }
   | RIGHT { MoveRight }
+;
+
+key_value:
+  | IDENT { $1 }
+  | STRING { $1 }
+  | LEFT { "left" }
+  | RIGHT { "right" }
+  | JUMP { "jump" }
+;
 
 keybind:
-  | key_name COLON IDENT NEWLINE {
+  | key_name COLON key_value NEWLINE
+    {
       if is_valid_key $3 then
         { action = $1; key = $3 }
       else
         failwith ("Invalid key: " ^ $3)
     }
+;
+
+arena_block_opt:
+  | /* empty */ { None }
+  | ARENA header_colon arena_literal separators
+    { Some (make_arena $3) }
+;
+
+arena_literal:
+  | LBRACKET arena_rows_opt RBRACKET { $2 }
+;
+
+arena_rows_opt:
+  | /* empty */ { [] }
+  | arena_rows maybe_comma { $1 }
+;
+
+arena_rows:
+  | arena_row { [$1] }
+  | arena_rows COMMA arena_row { $1 @ [$3] }
+;
+
+arena_row:
+  | LBRACKET int_list_opt RBRACKET { $2 }
+;
+
+int_list_opt:
+  | /* empty */ { [] }
+  | int_list maybe_comma { $1 }
+;
+
+int_list:
+  | INT { [$1] }
+  | int_list COMMA INT { $1 @ [$3] }
+;
+
+maybe_comma:
+  | /* empty */ { () }
+  | COMMA { () }
+;
+
+top_keybinds_opt:
+  | /* empty */ { [] }
+  | top_keybinds { $1 }
+;
+
+top_keybinds:
+  | top_keybind_stmt top_keybinds { $1 :: $2 }
+  | top_keybind_stmt { [$1] }
+;
+
+top_keybind_stmt:
+  | KEYS COLON NEWLINE INDENT keybind_lines DEDENT separators
+    { Keybinds $5 }
+;
+
+expr:
+  | INT { Econst (SCint $1) }
+  | FLOAT { Econst (SCfloat $1) }
+  | ident_tok { Evar $1 }
+  | expr PLUS expr { Ebinop (Badd, $1, $3) }
+  | expr MINUS expr { Ebinop (Bmin, $1, $3) }
+  | expr MULTIPLY expr { Ebinop (Bmul, $1, $3) }
+  | expr DIVIDE expr { Ebinop (Bdiv, $1, $3) }
+  | LPAREN expr RPAREN { $2 }
+  | LBRACKET separated_list(COMMA, expr) RBRACKET { Elist $2 }
+;
+
+ident_tok:
+  | IDENT { { loc = ($startpos, $endpos); id = $1; pos = $startpos } }
+;
