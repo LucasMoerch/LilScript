@@ -5,3 +5,4 @@ class Settings:
         self.SPEED: float = speed
         self.TIME: int = time #Time in seconds
         self.TICK_SPEED: float = tickSpeed #FPS
+        self.TILE_SIZE = 32

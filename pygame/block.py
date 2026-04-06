@@ -1,6 +1,7 @@
 import pygame
 class Block:
     def __init__(self, x, y, blockType):
+        self.rect = pygame.Rect(x, y, 32, 32)
         self.X: int = x
         self.Y: int = y
         self.COLOR = 0
@@ -23,8 +24,8 @@ class Block:
 
     def draw_block(self, screen):
         if self.BLOCKTYPE in ("solid", "win", "lose"):
-             pygame.draw.rect(screen, self.COLOR, (self.X, self.Y, 32, 32))
-
+             pygame.draw.rect(screen, self.COLOR, (self.rect.x, self.rect.y, 32, 32))
+    
 
 
     

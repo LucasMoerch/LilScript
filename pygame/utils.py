@@ -2,6 +2,7 @@ import pygame
 from player import Player, Keys
 from settings import Settings
 from block import Block
+from level import mapList
 # Create custom keys
 # the current valid_keys should work with the documentation of pygame.key.key_code -- else key.pyi has the anwsers
 
@@ -37,3 +38,24 @@ def create_block (xInput,yInput, blockTypeInput):
         blockType = blockTypeInput
     )
     return block
+def create_level(settings):
+
+    i = 0
+    mapWidth = 20
+    yCoordinate = 1
+    xCoordinate = 1
+    blockList = []
+    #Need to write an fail scenario if the map reaches more than 20 lines
+    while i < len(mapList):
+        temp_block = create_block(xCoordinate*settings.TILE_SIZE, yCoordinate*settings.TILE_SIZE,mapList[i])
+        blockList.append(temp_block)
+        #Line switching logic
+        if (i+1) % mapWidth  == 0:
+    
+            yCoordinate += 1
+            xCoordinate = 0
+            
+        xCoordinate += 1
+        i += 1
+    return blockList
+
