@@ -1,6 +1,7 @@
 import pygame
 import utils
 import block
+import settings
 pygame.init()
 info = pygame.display.Info()
 #screenWidth = info.current_w
@@ -31,13 +32,13 @@ screen = pygame.display.set_mode((screenWidth, screenHeight))
 clock = pygame.time.Clock()
 
 #Creates the settings
-settings= utils.create_settings(jumpHeightInput,gravityInput,speedInput,timeInput,tickSpeedInput)
+game_settings = settings.Settings(jumpHeightInput,gravityInput,speedInput,timeInput,tickSpeedInput)
+
 #creates the blocklist, uses the settings to acess the tile size
-blockList = utils.create_level(settings)
+blockList = utils.create_level(game_settings)
 #creates 1 player
-player1 = utils.create_player(jumpInput,leftInput,rightInput,spawnInput,colorInput, settings)
-print("player1 X:", player1.rect.x)
-testRect = pygame.Rect(500,500,32,32)
+player1 = utils.create_player(jumpInput,leftInput,rightInput,spawnInput,colorInput, game_settings)
+
 
 
 running = True
@@ -48,10 +49,7 @@ while running:
         block.draw_block(screen)
     player1.draw(screen)
 
-    if player1.rect.colliderect(testRect):
-        pygame.draw.rect(screen, colorInput2,testRect)
-    else:
-        pygame.draw.rect(screen, colorInput3,testRect)
+ 
     
 
     pygame.display.flip()

@@ -7,7 +7,7 @@ from settings import Settings
 jump = "space" #example
 left = "a"     #example
 right = "d"    #example
-custom_keys = Keys(JUMP=jump, LEFT=left, RIGHT=right)
+custom_keys = Keys(jump=jump, left=left, right=right)
 
 
 # Create player with all custom parameters
@@ -18,8 +18,8 @@ player = Player(
 )
 #Create the settings/game constants with custom parameters
 settings = Settings(
-    jumpHeight = 1,         #Custom jump height (float)
+    jump_height = 1,        #Custom jump height (float)
     gravity = 1,            #Custom gravity const (float)
     time = 60,              #Custom time count (int)
-    tickSpeed = 60          #Custom tickspeed (FPS) - (float)
+    tick_speed = 60         #Custom tickspeed (FPS) - (float)
 )
