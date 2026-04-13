@@ -6,4 +6,6 @@
 
 (executable
  (name arena_editor)
- (libraries LilScript notty notty.unix))
+ (public_name arena_editor)
+ (libraries LilScript notty notty.unix unix)
+ (modules arena_editor))

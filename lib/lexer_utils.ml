@@ -24,6 +24,7 @@ let keyword_or_ident s =
   | "jump" -> JUMP
   | "left" -> LEFT
   | "right" -> RIGHT
+  | "arena_file" -> ARENA_FILE
   | lower -> IDENT lower
 
 (* pushes INDENT or pops DEDENTs based on column n vs the stack top *)

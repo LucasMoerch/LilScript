@@ -44,6 +44,19 @@ let () =
 
       Diagnostics.check_duplicates ast.Ast.constants;
 
+      (* resolve arena_file into an arena if no inline arena was given *)
+      let ast =
+        match ast.Ast.arena_file with
+        | None -> ast
+        | Some path ->
+            if ast.Ast.arena <> None then
+              Printf.eprintf
+                "Warning: both arena: and arena_file: given, using arena_file\n\
+                 %!";
+            let arena = Arena_reader.read_arena path in
+            { ast with Ast.arena = Some arena }
+      in
+
       (* generate python output *)
       let python_src = Codegen.generate ast in
       let out_path =
