@@ -1,7 +1,7 @@
 import pygame
 from player import Player, Keys
-from settings import Settings
 from block import Block
+from level import mapList
 # Create custom keys
 # the current valid_keys should work with the documentation of pygame.key.key_code -- else key.pyi has the anwsers
 
@@ -19,16 +19,6 @@ def create_player(jumpInput, leftInput, rightInput, spawnInput, colorInput, sett
     return player
 
 
-def create_settings(jumpHeightInput, gravityInput, speedInput, timeInput, tickSpeedInput):
-    #create custom settings
-    settings = Settings(
-        jumpHeight = jumpHeightInput,     #Custom jump height (float)
-        gravity = gravityInput,           #Custom gravity const (float)
-        speed = speedInput,               #Custom speed const (float)
-        time = timeInput,                 #Custom time count (int)
-        tickSpeed = tickSpeedInput        #Custom tickspeed (FPS) - (float)
-    )
-    return settings
 
 def create_block (xInput,yInput, blockTypeInput):
     block = Block(
@@ -37,3 +27,23 @@ def create_block (xInput,yInput, blockTypeInput):
         blockType = blockTypeInput
     )
     return block
+def create_level(settings):
+
+    i = 0
+    yCoordinate = 0
+    xCoordinate = 0
+    blockList = []
+    #Need to write an fail scenario if the map reaches more than 20 lines
+    while i < len(mapList):
+        temp_block = create_block(xCoordinate * settings.tile_size, yCoordinate * settings.tile_size, mapList[i])
+        blockList.append(temp_block)
+        #Line switching logic
+        if (i+1) % settings.map_width  == 0:
+    
+            yCoordinate += 1
+            xCoordinate = -1
+            
+        xCoordinate += 1
+        i += 1
+    return blockList
+
