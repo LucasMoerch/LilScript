@@ -45,6 +45,7 @@ type player = {
 type program = {
   constants : const_decl list;
   arena : arena option;
+  arena_file : string option;
   players : player list;
   stmts : stmt list;
 }

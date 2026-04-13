@@ -1,30 +1,25 @@
 tile_size: 32
 
 constants:
-  hello: 42
-  whoa: 2.5
-  name: "saleeem"
-  empty: // Test empty
+  GRAVITY: 1.2
+  JUMP_HEIGHT: 14
+  SPEED: 4
+  TICK_SPEED: 60
 
 players:
   p1:
     color: 255 80 80
     spawn: 2 2
     keys:
-      JUMP: "space"
+      JUMP: "up"
       LEFT: "left"
       RIGHT: "right"
-
   p2:
     color: 80 255 80
-    spawn: 10 20
+    spawn: 3 3
     keys:
       JUMP: "w"
       LEFT: "a"
       RIGHT: "d"
 
-arena: [
-  [0, 1, 1],
-  [0, 0, 2],
-  [0, 0, 3],
-]
+arena_file: "maps/level1.txt"

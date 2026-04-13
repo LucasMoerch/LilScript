@@ -58,6 +58,7 @@ let string_of_token = function
   | LPAREN -> "LPAREN"
   | RPAREN -> "RPAREN"
   | ARENA -> "ARENA"
+  | ARENA_FILE -> "ARENA_FILE"
   | SPAWN -> "SPAWN"
   | PLAYERS -> "PLAYERS"
   | KEYS -> "KEYS"

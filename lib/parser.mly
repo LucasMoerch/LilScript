@@ -21,6 +21,7 @@ open Arena
 
 %token ARENA SPAWN PLAYERS COLOR
 %token KEYS JUMP LEFT RIGHT
+%token ARENA_FILE
 
 %start <Ast.program> program
 
@@ -32,12 +33,13 @@ program:
   constants_block_opt
   players_block_opt
   arena_block_opt
+  arena_file_block_opt
   top_keybinds_opt
   separators
   EOF
     {
       let constants = $2 @ $3 in
-      { constants; players = $4; arena = $5; stmts = $6 }
+      { constants; players = $4; arena = $5; arena_file = $6; stmts = $7 }
     }
 ;
 
@@ -178,6 +180,11 @@ arena_block_opt:
   | /* empty */ { None }
   | ARENA header_colon arena_literal separators
     { Some (make_arena $3) }
+;
+
+arena_file_block_opt:
+  | /* empty */                        { None }
+  | ARENA_FILE header_colon STRING NEWLINE separators { Some $3 }
 ;
 
 arena_literal:
