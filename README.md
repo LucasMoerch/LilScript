@@ -25,7 +25,6 @@ LilScript/
 │   ├── ast_printer.ml    # AST debug printer
 │   └── keys.ml           # Key name validation
 ├── pygame/               # Python runtime (hand-written)
-│   ├── main.py
 │   ├── utils.py
 │   ├── settings.py
 │   ├── player.py
@@ -55,10 +54,18 @@ Install OCaml dependencies:
 opam install notty notty.unix ounit2
 ```
 
-Install the Python runtime dependency:
+Set up a Python virtual environment and install the runtime dependency:
 
 ```bash
-python -m pip install pygame-ce
+python3 -m venv .venv
+source .venv/bin/activate
+pip install pygame-ce
+```
+
+To activate the venv in future sessions:
+
+```bash
+source .venv/bin/activate
 ```
 
 ---
@@ -85,8 +92,25 @@ Arrows to move the cursor, number keys to place tiles, `S` to save, `Q` to quit.
 | `4` | Goal (win) |
 | `5` | Lose |
 
+Specify the output file and arena dimensions when launching the editor. Width and height are in tiles:
+
+```bash
+dune exec -- arena_editor --output maps/level1.txt --width 20 --height 15
+```
+
+If you reopen an existing file the saved dimensions are restored automatically and `--width`/`--height` are ignored:
+
 ```bash
 dune exec -- arena_editor --output maps/level1.txt
+```
+
+The saved `.txt` file starts with a `width height` header line:
+
+```
+20 15
+....................
+....................
+...###..............
 ```
 
 ### 2. Write a .lil file
@@ -94,29 +118,41 @@ dune exec -- arena_editor --output maps/level1.txt
 ```
 constants:
   GRAVITY: 1.5
-  JUMP: 15
-  SPEED: 5
+  JUMP_HEIGHT: 14
+  SPEED: 4
+  TICK_SPEED: 60
 
 players:
   p1:
     color: 255 80 80
     spawn: 3 5
     keys:
-      JUMP: "space"
-      LEFT: "a"
-      RIGHT: "d"
+      JUMP: "up"
+      LEFT: "left"
+      RIGHT: "right"
   p2:
     color: 80 255 80
     spawn: 10 5
     keys:
       JUMP: "w"
-      LEFT: "left"
-      RIGHT: "right"
+      LEFT: "a"
+      RIGHT: "d"
 
 arena_file: "maps/level1.txt"
 ```
 
-Tile types in the arena: `0` = empty, `1` = solid, `2` = win, `3` = lose.
+**Supported constants** (all optional, these are the defaults):
+
+| Name | Default | Effect |
+|------|---------|--------|
+| `GRAVITY` | `1.5` | Downward acceleration per frame |
+| `JUMP_HEIGHT` | `15` | Upward velocity on jump |
+| `SPEED` | `5` | Horizontal pixels per frame |
+| `TICK_SPEED` | `60` | FPS cap |
+
+**Known limitation:** constant names cannot collide with language keywords. Avoid naming constants `jump`, `left`, `right`, `keys`, `color`, `spawn`, `players`, `arena`, or `constants`.
+
+**Spawn coordinates** are in tile units, not pixels. `spawn: 3 5` places the player at tile column 3, row 5.
 
 ### 3. Compile the .lil file to Python
 
@@ -129,7 +165,7 @@ This writes `pygame/mygame.py`.
 ### 4. Run the game
 
 ```bash
-PYTHONPATH=pygame python3 pygame/mygame.py
+pygame python3 pygame/mygame.py
 ```
 
 ---
