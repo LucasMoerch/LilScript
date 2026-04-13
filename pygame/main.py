@@ -1,7 +1,7 @@
 import pygame
 import utils
-from level import blockList
-from block import Block
+import block
+import settings
 pygame.init()
 info = pygame.display.Info()
 #screenWidth = info.current_w
@@ -21,19 +21,24 @@ tickSpeedInput = 60
 jumpInput = "space"
 leftInput = "a"
 rightInput = "d"
-spawnInput = [500,500]
-colorInput = "#29C878"
+spawnInput = [150,100]
+colorInput = "#2961C8"
+colorInput2 = "#31DAC020"
+colorInput3 = "#551ACA1F"
 
 print("Width:", screenWidth)
 print("Height:", screenHeight)
 screen = pygame.display.set_mode((screenWidth, screenHeight))
 clock = pygame.time.Clock()
 
+#Creates the settings
+game_settings = settings.Settings(jumpHeightInput,gravityInput,speedInput,timeInput,tickSpeedInput)
 
-settings = utils.create_settings(jumpHeightInput,gravityInput,speedInput,timeInput,tickSpeedInput)
+#creates the blocklist, uses the settings to acess the tile size
+blockList = utils.create_level(game_settings)
+#creates 1 player
+player1 = utils.create_player(jumpInput,leftInput,rightInput,spawnInput,colorInput, game_settings)
 
-player1 = utils.create_player(jumpInput,leftInput,rightInput,spawnInput,colorInput, settings)
-print("player1 X:", player1.X)
 
 
 running = True
@@ -42,11 +47,18 @@ while running:
     #draws in the blocks
     for block in blockList:
         block.draw_block(screen)
-    pygame.draw.rect(screen, player1.COLOR, (int(player1.X), int(player1.Y), 32, 32))
+    player1.draw(screen)
+
+ 
+    
+
     pygame.display.flip()
+
+
+
     keysPressed = pygame.key.get_pressed()
 
-    player1.handle_input(keysPressed)
+    player1.handle_input(keysPressed, blockList)
     
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
