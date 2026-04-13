@@ -18,7 +18,12 @@ let const_value_to_str v default =
 
 (* look up a constant by name and convert its value to a string *)
 let lookup_const name default consts =
-  match List.find_opt (fun (c : const_decl) -> c.name = name) consts with
+  let lower = String.lowercase_ascii name in
+  match
+    List.find_opt
+      (fun (c : const_decl) -> String.lowercase_ascii c.name = lower)
+      consts
+  with
   | Some c -> const_value_to_str c.value default
   | None -> default
 
@@ -72,18 +77,19 @@ let emit_players buf (players : player list) =
       let color =
         Printf.sprintf "(%d,%d,%d)" p.color.red p.color.green p.color.blue
       in
+      (* multiply spawn tile coords by tile_size to get pixel position *)
       Buffer.add_string buf
         (Printf.sprintf
-           "player%d = utils.create_player(\"%s\",\"%s\",\"%s\",[%d,%d],%s, \
-            game_settings)\n"
-           (i + 1) jump left right p.spawn.x p.spawn.y color))
+           "player%d = \
+            utils.create_player(\"%s\",\"%s\",\"%s\",[%d,%d],%s,game_settings)\n"
+           (i + 1) jump left right (p.spawn.x * 32) (p.spawn.y * 32) color))
     players
 
 (* emit the game loop, parameterised on player count *)
 let emit_loop buf (players : player list) =
   Buffer.add_string buf
     {|
-blockList = utils.create_level(game_settings)
+blockList = utils.create_level(game_settings, mapList)
 screen = pygame.display.set_mode((
     game_settings.map_width  * game_settings.tile_size,
     game_settings.map_height * game_settings.tile_size))
@@ -113,7 +119,7 @@ while running:
     {|    for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-
+    clock.tick(game_settings.tick_speed)
 pygame.quit()
 |}
 

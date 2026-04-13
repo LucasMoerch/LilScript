@@ -7,11 +7,11 @@
 (generate_opam_files true)
 
 (source
- (github username/reponame))
+ (github lucasmoerch/LilScript))
 
-(authors "Author Name <author@example.com>")
+(authors "SW9P4")
 
-(maintainers "Maintainer Name <maintainer@example.com>")
+(maintainers "SW9P4")
 
 (license LICENSE)
 
