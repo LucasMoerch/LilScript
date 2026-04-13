@@ -20,6 +20,7 @@ LilScript is a small Domain Specfic Language implemented in OCaml (ocamllex + Me
 - Menhir installed in the same environment as Dune/OCaml
 - Python
 - Pygame-ce
+- Notty + Notty-unix
 
 To install menhir with opam:
 ```bash
@@ -29,6 +30,11 @@ to install python-ce with pip:
 ```bash
 python -m pip install pygame-ce
 ```
+to install notty-nuix with opam:
+´´´bash
+opam install notty notty-unix
+´´´
+
 ## Build
 ```bash
 dune build
@@ -47,6 +53,13 @@ dune exec lilscriptc -- --tokens path/to/file.lil
 ```bash
 dune exec lilscriptc -- --ast path/to/file.lil
 ```
+
+### Run the arena editor in terminal:
+´´´bash
+dune build
+dune exec ./bin/arena_editor.exe
+´´´
+
 ## Running Tests
 
 To run the unit tests, make sure you have `ounit2` installed:
