@@ -1,6 +1,6 @@
 (library
  (name LilScript)
- (modules ast keys lexer_utils lexer arena parser ast_printer))
+ (modules ast keys lexer_utils lexer arena parser ast_printer codegen))
 
 (ocamllex lexer)
 
