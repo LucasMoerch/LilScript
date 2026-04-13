@@ -1,6 +1,6 @@
 # LilScript
 
-LilScript is a compiler for a small Domain-Specific Language, written in OCaml (ocamllex + ocamlyacc + Dune). It takes `.lil` files and compiles them into Python source files that run on top of a Pygame runtime, letting you define simple 2D platformer games without writing Python directly.
+LilScript is a compiler for a small Domain-Specific Language, written in OCaml (ocamllex + menhir + Dune). It takes `.lil` files and compiles them into Python source files that run on top of a Pygame runtime, letting you define simple 2D platformer games without writing Python directly.
 
 ---
 
