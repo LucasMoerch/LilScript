@@ -1,5 +1,6 @@
 import pygame
 from dataclasses import dataclass
+import block
 
 
 @dataclass
@@ -71,6 +72,9 @@ class Player:
                         self.rect.left = block.rect.right
 
                     self.x = float(self.rect.x)
+                    if self.settings.block_erase_mode:
+                        block.start_block_timer()
+
 
         self.y += dy
         self.rect.y = int(self.y)
@@ -84,13 +88,21 @@ class Player:
                     if dy > 0:
                         self.rect.bottom = block.rect.top
                         self.grounded = True
+                        if self.settings.block_erase_mode:
+                            block.start_block_timer()
+
                     #if the the player was moving up snap the player out on the bottom of the block
                     elif dy < 0:
-                        self.rect.top = block.rect.bottom
+                        if self.settings.block_erase_mode: 
+                            self.rect.top = block.rect.bottom
 
                     self.y = float(self.rect.y)
                     #once done falling set velocity to 0
                     self.velocity_y = 0
+
+
+
+
 
             #if player collides 
             if block.block_type == "lose":
