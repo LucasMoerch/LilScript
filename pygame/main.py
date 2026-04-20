@@ -33,12 +33,19 @@ screen = pygame.display.set_mode((
     game_settings.map_width  * game_settings.tile_size,
     game_settings.map_height  * game_settings.tile_size))
 clock = pygame.time.Clock()
-background = pygame.image.load("pygame/assets/background.png").convert_alpha()
-background = pygame.transform.scale(background, screen.get_size())
+background = None
+try:
+    background = pygame.image.load("pygame/assets/background.png").convert_alpha()
+    background = pygame.transform.scale(background, screen.get_size())
+except:
+    pass
 
 running = True
 while running:
-    screen.blit(background)
+    if background:
+        screen.blit(background)
+    else:
+        screen.fill((255, 255, 255))
     for b in blockList:
         b.draw_block(screen)
         b.update(game_settings)
