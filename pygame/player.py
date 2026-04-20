@@ -16,7 +16,7 @@ class Keys:
 
 
 class Player:
-    def __init__(self, color="#FFFFFF", spawn=[100,100], keys=None,settings=None):
+    def __init__(self, color="#FFFFFF", spawn=[100,100], keys=None,settings=None, player_nr=0):
         self.color = color
         self.spawn = spawn 
         self.settings = settings
@@ -26,6 +26,7 @@ class Player:
         self.y = float(spawn[1])
         self.grounded = True
         self.velocity_y = 0.0
+        self.player_nr = player_nr
         self.keys = keys if keys else Keys(  # if no keys have been selected, use the standard ones
             jump="space",                  # could be nice to get a way to check if the loaded player is the second player
             left="a",                      # if so then use the arrow keys instead
@@ -75,7 +76,6 @@ class Player:
                     if self.settings.block_erase_mode:
                         block.start_block_timer()
 
-
         self.y += dy
         self.rect.y = int(self.y)
 
@@ -93,39 +93,51 @@ class Player:
 
                     #if the the player was moving up snap the player out on the bottom of the block
                     elif dy < 0:
-                        if self.settings.block_erase_mode: 
-                            self.rect.top = block.rect.bottom
+                        self.rect.top = block.rect.bottom
 
                     self.y = float(self.rect.y)
                     #once done falling set velocity to 0
                     self.velocity_y = 0
 
+        for block in blockList:
+            if block.block_type in ("lose", "win") and self.rect.colliderect(block.rect):
+                self.reset_to_spawn()
+                return
 
-
-
-
-            #if player collides 
-            if block.block_type == "lose":
-                 if self.rect.colliderect(block.rect):
-                    self.x = self.spawn[0]
-                    self.y = self.spawn[1]
-                    self.rect.x = self.spawn[0]
-                    self.rect.y = self.spawn[1]
-
-            if block.block_type == "win":
-                 if self.rect.colliderect(block.rect):
-                    self.x = self.spawn[0]
-                    self.y = self.spawn[1]
-                    self.rect.x = self.spawn[0]
-                    self.rect.y = self.spawn[1]
-
+        max_x = self.settings.map_width * self.settings.tile_size
+        max_y = self.settings.map_height * self.settings.tile_size
         self.rect.left = max(self.rect.left, 0)
-        self.rect.right = min(self.rect.right, self.settings.map_width * self.settings.tile_size)
+        self.rect.right = min(self.rect.right, max_x)
         self.rect.top = max(self.rect.top, 0)
-        self.rect.bottom = min(self.rect.bottom, self.settings.map_height* self.settings.tile_size)
+        self.rect.bottom = min(self.rect.bottom, max_y)
+
+        if self.rect.bottom >= max_y:
+            self.grounded = True
+            self.velocity_y = 0
+
+        if self.rect.top <= 0 and self.velocity_y < 0:
+            self.velocity_y = 0
+
         self.x = float(self.rect.x)
         self.y = float(self.rect.y)    
 
+    def reset_to_spawn(self):
+        self.x = float(self.spawn[0])
+        self.y = float(self.spawn[1])
+        self.rect.x = self.spawn[0]
+        self.rect.y = self.spawn[1]
+        self.velocity_y = 0.0
+        self.grounded = False
+
     def draw(self, screen):
-        pygame.draw.rect(screen, self.color, self.rect, )
-    
+        try:
+            img = pygame.image.load(f"pygame/assets/player{self.player_nr}.png").convert_alpha()
+        except:
+            pygame.draw.rect(screen, self.color, self.rect, )
+            return
+
+        if img:   
+            rect = img.get_rect(topleft=(self.rect.x, self.rect.y))
+            screen.blit(img, rect)
+        
+        

@@ -27,7 +27,19 @@ class Block:
 
     def draw_block(self, screen):
         if self.block_type in ("solid", "win", "lose"):
-             pygame.draw.rect(screen, self.color, (self.rect.x, self.rect.y, 32, 32))
+            if self.block_type == "solid":
+                img = pygame.image.load("pygame/assets/solid.png").convert_alpha()
+            elif self.block_type == "win":
+                img = pygame.image.load("pygame/assets/win.png").convert_alpha()
+            elif self.block_type == "lose":
+                img = pygame.image.load("pygame/assets/lose.png").convert_alpha()
+            else:
+                raise ValueError(f"Unknown block type: {self.block_type}")
+            if img:
+                rect = img.get_rect(topleft=(self.rect.x, self.rect.y))
+                screen.blit(img, rect)
+            else:
+                pygame.draw.rect(screen, self.color, (self.rect.x, self.rect.y, 32, 32))
 
     def start_block_timer(self):
         if self.block_touched_time is None:
