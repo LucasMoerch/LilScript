@@ -23,3 +23,11 @@ players:
       RIGHT: "d"
 
 arena_file: "maps/level1.txt"
+
+assets:
+  background: "pygame/assets/background.png"
+  solid: "pygame/assets/solid.png"
+  win: "pygame/assets/win.png"
+  lose: "pygame/assets/lose.png"
+  player1: "pygame/assets/player1.png"
+  player2: "pygame/assets/player2.png"

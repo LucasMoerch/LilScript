@@ -42,10 +42,31 @@ type player = {
   keybinds : keybind list;
 }
 
+(* asset paths for sprites and background, all optional *)
+type assets = {
+  background : string option;
+  solid : string option;
+  win : string option;
+  lose : string option;
+  player_assets : string list;
+      (* indexed by player order, player_assets[0] = player1 *)
+}
+
+(* default assets record used when no assets block is present *)
+let empty_assets =
+  {
+    background = None;
+    solid = None;
+    win = None;
+    lose = None;
+    player_assets = [];
+  }
+
 type program = {
   constants : const_decl list;
   arena : arena option;
   arena_file : string option;
+  assets : assets;
   players : player list;
   stmts : stmt list;
 }
