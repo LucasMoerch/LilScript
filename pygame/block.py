@@ -1,21 +1,21 @@
 import pygame
 import time
+
 class Block:
-    def __init__(self, x, y, blockType):
+    def __init__(self, x, y, blockType, settings=None):
         self.rect = pygame.Rect(x, y, 32, 32)
         self.x: int = x
         self.y: int = y
         self.color = 0
-        self.block_type = 0 
+        self.block_type = 0
+        self.settings = settings
         self.block_touched_time = None
-
-
         self.setup(blockType)
 
-    def setup(self,blockType):
+    def setup(self, blockType):
         if blockType == 1:
-             self.block_type = "solid"
-             self.color = "#CD11D3"
+            self.block_type = "solid"
+            self.color = "#CD11D3"
         elif blockType == 2:
             self.block_type = "win"
             self.color = "#11d314"
@@ -23,29 +23,39 @@ class Block:
             self.block_type = "lose"
             self.color = "#d31111"
 
-             
-
     def draw_block(self, screen):
         if self.block_type in ("solid", "win", "lose"):
-            if self.block_type == "solid":
-                img = pygame.image.load("pygame/assets/solid.png").convert_alpha()
-            elif self.block_type == "win":
-                img = pygame.image.load("pygame/assets/win.png").convert_alpha()
-            elif self.block_type == "lose":
-                img = pygame.image.load("pygame/assets/lose.png").convert_alpha()
-            else:
-                raise ValueError(f"Unknown block type: {self.block_type}")
-            if img:
+            # use asset path from settings if provided, otherwise fall back to defaults
+            img_path = None
+            if self.settings:
+                if self.block_type == "solid":
+                    img_path = self.settings.asset_solid
+                elif self.block_type == "win":
+                    img_path = self.settings.asset_win
+                elif self.block_type == "lose":
+                    img_path = self.settings.asset_lose
+
+            # fall back to hardcoded paths if no asset was set
+            if img_path is None:
+                if self.block_type == "solid":
+                    img_path = "pygame/assets/solid.png"
+                elif self.block_type == "win":
+                    img_path = "pygame/assets/win.png"
+                elif self.block_type == "lose":
+                    img_path = "pygame/assets/lose.png"
+
+            try:
+                img = pygame.image.load(img_path).convert_alpha()
                 rect = img.get_rect(topleft=(self.rect.x, self.rect.y))
                 screen.blit(img, rect)
-            else:
+            except:
                 pygame.draw.rect(screen, self.color, (self.rect.x, self.rect.y, 32, 32))
 
     def start_block_timer(self):
         if self.block_touched_time is None:
             self.block_touched_time = pygame.time.get_ticks()
-    
-    def update(self,settings):
+
+    def update(self, settings):
         if self.block_touched_time is not None:
             if pygame.time.get_ticks() > self.block_touched_time + settings.erase_time:
                 self.block_type = 0

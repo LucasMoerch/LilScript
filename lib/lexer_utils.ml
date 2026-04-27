@@ -17,6 +17,7 @@ let keyword_or_ident s =
   match lowercase s with
   | "constants" -> CONSTANTS
   | "arena" -> ARENA
+  | "arena_file" -> ARENA_FILE
   | "spawn" -> SPAWN
   | "players" -> PLAYERS
   | "keys" -> KEYS
@@ -24,7 +25,11 @@ let keyword_or_ident s =
   | "jump" -> JUMP
   | "left" -> LEFT
   | "right" -> RIGHT
-  | "arena_file" -> ARENA_FILE
+  | "assets" -> ASSETS
+  | "background" -> BACKGROUND
+  | "solid" -> SOLID_TILE
+  | "win" -> WIN_TILE
+  | "lose" -> LOSE_TILE
   | lower -> IDENT lower
 
 (* pushes INDENT or pops DEDENTs based on column n vs the stack top *)

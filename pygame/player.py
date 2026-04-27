@@ -1,6 +1,5 @@
 import pygame
 from dataclasses import dataclass
-import block
 
 
 @dataclass
@@ -16,9 +15,9 @@ class Keys:
 
 
 class Player:
-    def __init__(self, color="#FFFFFF", spawn=[100,100], keys=None,settings=None, player_nr=0):
+    def __init__(self, color="#FFFFFF", spawn=[100,100], keys=None, settings=None, player_nr=0):
         self.color = color
-        self.spawn = spawn 
+        self.spawn = spawn
         self.settings = settings
         self.size = self.settings.tile_size if self.settings else 32
         self.rect = pygame.Rect(spawn[0], spawn[1], self.size, self.size)
@@ -32,16 +31,16 @@ class Player:
             left="a",                      # if so then use the arrow keys instead
             right="d"
         )
-    
+
     def handle_input(self, keysPressed, blockList):
         dx = 0.0
         speed = self.settings.speed if self.settings else 1
         #if moving right set delta x to the amount of pixels the player moved to the right
         if keysPressed[self.keys.right]:
-            dx += speed 
+            dx += speed
         #if moving left set delta x to the amount of pixels the player moved to the left
         if keysPressed[self.keys.left]:
-            dx -= speed 
+            dx -= speed
         #if the player is grounded and performs a jump give delta y in terms of a velocity to mimic gravity
         if keysPressed[self.keys.jump] and self.grounded == True:
             jump_height = self.settings.jump_height if self.settings else speed * 2
@@ -51,9 +50,8 @@ class Player:
         self.apply_gravity()
 
     def apply_gravity(self):
-
         gravity = self.settings.gravity if self.settings else 1
-        self.velocity_y += gravity 
+        self.velocity_y += gravity
 
     def move(self, dx, dy, blockList):
         self.grounded = False
@@ -63,7 +61,6 @@ class Player:
 
         for block in blockList:
             if block.block_type == "solid":
-
                 if self.rect.colliderect(block.rect):
                     #if the the player was moving right snap the player out to the left of the block
                     if dx > 0:
@@ -71,7 +68,6 @@ class Player:
                     #if the the player was moving left snap the player out to the right of the block
                     elif dx < 0:
                         self.rect.left = block.rect.right
-
                     self.x = float(self.rect.x)
                     if self.settings.block_erase_mode:
                         block.start_block_timer()
@@ -81,7 +77,6 @@ class Player:
 
         for block in blockList:
             if block.block_type == "solid":
-        
                 if self.rect.colliderect(block.rect):
                     #if the the player was moving down snap the player out to the on top of the block and give status grounded
                     #grounded allows the player to perfom a jump again
@@ -90,11 +85,9 @@ class Player:
                         self.grounded = True
                         if self.settings.block_erase_mode:
                             block.start_block_timer()
-
                     #if the the player was moving up snap the player out on the bottom of the block
                     elif dy < 0:
                         self.rect.top = block.rect.bottom
-
                     self.y = float(self.rect.y)
                     #once done falling set velocity to 0
                     self.velocity_y = 0
@@ -119,7 +112,7 @@ class Player:
             self.velocity_y = 0
 
         self.x = float(self.rect.x)
-        self.y = float(self.rect.y)    
+        self.y = float(self.rect.y)
 
     def reset_to_spawn(self):
         self.x = float(self.spawn[0])
@@ -130,14 +123,21 @@ class Player:
         self.grounded = False
 
     def draw(self, screen):
-        try:
-            img = pygame.image.load(f"pygame/assets/player{self.player_nr}.png").convert_alpha()
-        except:
-            pygame.draw.rect(screen, self.color, self.rect, )
-            return
+        # use asset path from settings if provided for this player number
+        img_path = None
+        if self.settings:
+            if self.player_nr == 1:
+                img_path = self.settings.asset_player1
+            elif self.player_nr == 2:
+                img_path = self.settings.asset_player2
 
-        if img:   
+        # fall back to default asset path if no override was set
+        if img_path is None:
+            img_path = f"pygame/assets/player{self.player_nr}.png"
+
+        try:
+            img = pygame.image.load(img_path).convert_alpha()
             rect = img.get_rect(topleft=(self.rect.x, self.rect.y))
             screen.blit(img, rect)
-        
-        
+        except:
+            pygame.draw.rect(screen, self.color, self.rect)
