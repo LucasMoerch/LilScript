@@ -37,6 +37,17 @@ let tile_kind_to_int = function
 (* format an optional string as a Python string literal or None *)
 let opt_path = function Some s -> Printf.sprintf "\"%s\"" s | None -> "None"
 
+(* evaluate a color or spawn expression to an int for codegen.
+   by the time we get here typecheck has already verified the type *)
+let eval_to_int (consts : const_decl list) (e : expr) : int =
+  match e with
+  | Econst (SCint i) -> i
+  | Evar id -> (
+      match List.find_opt (fun (c : const_decl) -> c.name = id.id) consts with
+      | Some { value = Cint i; _ } -> i
+      | _ -> failwith ("codegen: cannot resolve '" ^ id.id ^ "' to int"))
+  | _ -> failwith "codegen: color/spawn must be int expressions"
+
 (* emit the Settings() call from arena + constants + assets *)
 let emit_settings buf (arena : arena) (consts : const_decl list)
     (assets : assets) =
@@ -81,21 +92,23 @@ let find_key action keybinds =
   | None -> "none"
 
 (* emit one create_player call per player, passing player number for sprite lookup *)
-let emit_players buf (players : player list) =
+let emit_players buf (players : player list) (consts : const_decl list) =
   List.iteri
     (fun i p ->
       let jump = find_key Jump p.keybinds in
       let left = find_key MoveLeft p.keybinds in
       let right = find_key MoveRight p.keybinds in
-      let color =
-        Printf.sprintf "(%d,%d,%d)" p.color.red p.color.green p.color.blue
-      in
+      (* evaluate color and spawn expressions to ints -- typecheck guarantees they are valid *)
+      let r = eval_to_int consts p.color.red in
+      let g = eval_to_int consts p.color.green in
+      let b = eval_to_int consts p.color.blue in
+      let sx = eval_to_int consts p.spawn.x in
+      let sy = eval_to_int consts p.spawn.y in
       Buffer.add_string buf
         (Printf.sprintf
            "player%d = \
-            utils.create_player(\"%s\",\"%s\",\"%s\",[%d,%d],%s,game_settings,%d)\n"
-           (i + 1) jump left right (p.spawn.x * 32) (p.spawn.y * 32) color
-           (i + 1)))
+            utils.create_player(\"%s\",\"%s\",\"%s\",[%d,%d],(%d,%d,%d),game_settings,%d)\n"
+           (i + 1) jump left right (sx * 32) (sy * 32) r g b (i + 1)))
     players
 
 (* emit the game loop, parameterised on player count *)
@@ -155,6 +168,7 @@ let generate (prog : program) : string =
       emit_header buf;
       emit_settings buf arena prog.constants prog.assets;
       emit_map buf arena.tiles;
-      emit_players buf prog.players;
+      (* pass constants so color and spawn expressions can be evaluated *)
+      emit_players buf prog.players prog.constants;
       emit_loop buf prog.players;
       Buffer.contents buf

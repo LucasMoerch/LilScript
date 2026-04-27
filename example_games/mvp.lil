@@ -16,7 +16,7 @@ players:
       RIGHT: "right"
   p2:
     color: 80 255 80
-    spawn: 3 3
+    spawn: 3 3000
     keys:
       JUMP: "w"
       LEFT: "a"

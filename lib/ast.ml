@@ -31,9 +31,11 @@ and stmt = Keybinds of keybind list
 and const_decl = { name : string; value : const_value; pos : Lexing.position }
 
 type tile_kind = Tsolid | Twin | Tlose | Tempty
-type position = { x : int; y : int }
+
+(* color and spawn now hold expressions so constants can be referenced *)
+type position = { x : expr; y : expr }
 type arena = { width : int; height : int; tiles : tile_kind array array }
-type rgb_color = { red : int; green : int; blue : int }
+type rgb_color = { red : expr; green : expr; blue : expr }
 
 type player = {
   name : string;

@@ -132,13 +132,19 @@ player_fields:
   | keys_field spawn_field color_field { ($3, $2, $1) }
 ;
 
+(* int_expr accepts either a literal int or a constant reference *)
+int_expr:
+  | INT   { Econst (SCint $1) }
+  | IDENT { Evar { loc = ($startpos, $endpos); id = $1; pos = $startpos } }
+;
+
 color_field:
-  | COLOR COLON INT INT INT NEWLINE
+  | COLOR COLON int_expr int_expr int_expr NEWLINE
     { { red = $3; green = $4; blue = $5 } }
 ;
 
 spawn_field:
-  | SPAWN COLON INT INT NEWLINE
+  | SPAWN COLON int_expr int_expr NEWLINE
     { { x = $3; y = $4 } }
 ;
 
@@ -217,7 +223,7 @@ maybe_comma:
 ;
 
 arena_file_block_opt:
-  | /* empty */                              { None }
+  | /* empty */                                      { None }
   | ARENA_FILE header_colon STRING NEWLINE separators { Some $3 }
 ;
 
