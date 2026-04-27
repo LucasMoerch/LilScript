@@ -22,7 +22,7 @@ mapList = [
     0,0,0,1,1,1,1,1,1,0,0,0,1,1,1,1,1,0,0,0,
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3
+    3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,
 ]
 player1 = utils.create_player("up","left","right",[64,64],(255,80,80),game_settings)
 player2 = utils.create_player("w","a","d",[96,96],(80,255,80),game_settings)
@@ -30,7 +30,7 @@ player2 = utils.create_player("w","a","d",[96,96],(80,255,80),game_settings)
 blockList = utils.create_level(game_settings, mapList)
 screen = pygame.display.set_mode((
     game_settings.map_width  * game_settings.tile_size,
-    game_settings.map_height * game_settings.tile_size))
+    game_settings.map_height  * game_settings.tile_size))
 clock = pygame.time.Clock()
 
 running = True
