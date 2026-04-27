@@ -10,3 +10,5 @@ class Settings:
     tile_size: int = 32
     map_width: int = 20
     map_height: int = 20
+    block_erase_mode:bool = False
+    erase_time:int = 0
