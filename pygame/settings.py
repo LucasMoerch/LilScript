@@ -13,7 +13,7 @@ class Settings:
     map_height: int = 20
     block_erase_mode: bool = False
     erase_time: int = 0
-    # asset paths -- None means fall back to colored rectangles
+    # asset paths. None means fall back to colored rectangles
     asset_background: Optional[str] = None
     asset_solid: Optional[str] = None
     asset_win: Optional[str] = None

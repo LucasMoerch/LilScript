@@ -1,9 +1,9 @@
 open Ast
 
-(* the types we track -- numeric covers both int and float for arithmetic *)
+(* the types we track, numeric covers both int and float for arithmetic *)
 type lil_type = TInt | TFloat | TString | TBool
 
-(* raised on any type or semantic error, carries a human readable message *)
+(* raised on any type or semantic errore *)
 exception Type_error of string
 
 let string_of_type = function
@@ -65,7 +65,7 @@ let rec check_expr env (e : expr) : lil_type =
                   (string_of_type t1) (string_of_type t2))))
   | Elist _ -> raise (Type_error "list cannot be used in arithmetic")
 
-(* check an expression resolves to int specifically -- used for color and spawn *)
+(* check an expression resolves to int specifically, used for color and spawn *)
 let check_int_expr env context (e : expr) : unit =
   match check_expr env e with
   | TInt -> ()
@@ -79,7 +79,7 @@ let check_int_expr env context (e : expr) : unit =
               (string_of_type t)))
 
 (* evaluate an int expression to its value at compile time for range checks.
-   only works for literals and simple arithmetic -- constant refs not yet supported *)
+   only works for literals and simple arithmetic, constant refs not yet supported *)
 let rec eval_int_expr (e : expr) : int option =
   match e with
   | Econst (SCint i) -> Some i
@@ -99,9 +99,9 @@ let rec eval_int_expr (e : expr) : int option =
       match (eval_int_expr e1, eval_int_expr e2) with
       | Some a, Some b when b <> 0 -> Some (a / b)
       | _ -> None)
-  | _ -> None (* constant refs return None -- we skip range check *)
+  | _ -> None (* constant refs return None *)
 
-(* check a color component expression -- must be int, range checked if possible *)
+(* check a color component expression *)
 let check_color_component env player_name field (e : expr) =
   check_int_expr env (Printf.sprintf "player '%s' color %s" player_name field) e;
   (* if the value is a literal we can range check it at compile time *)
@@ -113,7 +113,7 @@ let check_color_component env player_name field (e : expr) =
               player_name field v))
   | _ -> ()
 
-(* check spawn component expression -- must be int *)
+(* check spawn component expression *)
 let check_spawn_component env player_name axis (e : expr) =
   check_int_expr env (Printf.sprintf "player '%s' spawn %s" player_name axis) e
 
@@ -148,8 +148,7 @@ let check_keybinds (p : player) =
       (Type_error
          (Printf.sprintf "player '%s' is missing a right keybind" p.name))
 
-(* top-level type checker -- call after parsing, before codegen.
-   raises Type_error on the first problem found *)
+(* top-level type checker *)
 let check (prog : program) =
   let env = build_env prog.constants in
   (* check constants in order so expressions can reference earlier ones *)
@@ -157,11 +156,11 @@ let check (prog : program) =
   (* check each player's color, spawn, and keybinds *)
   List.iter
     (fun (p : player) ->
-      (* type check color -- each component must be an int expression *)
+      (* type check color, each component must be an int expression *)
       check_color_component env p.name "red" p.color.red;
       check_color_component env p.name "green" p.color.green;
       check_color_component env p.name "blue" p.color.blue;
-      (* type check spawn -- each component must be an int expression *)
+      (* type check spawn, each component must be an int expression *)
       check_spawn_component env p.name "x" p.spawn.x;
       check_spawn_component env p.name "y" p.spawn.y;
       check_keybinds p)
