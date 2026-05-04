@@ -47,12 +47,21 @@ let print_keybind level { action; key } =
   in
   Printf.printf "%sKeybind %s -> %s\n" (indent level) action_str key
 
+(* color and spawn are now expressions, so print them as expr trees *)
 let print_player level (p : player) =
   Printf.printf "%sPlayer %s\n" (indent level) p.name;
-  Printf.printf "%sColor (%d, %d, %d)\n"
-    (indent (level + 1))
-    p.color.red p.color.green p.color.blue;
-  Printf.printf "%sSpawn (%d, %d)\n" (indent (level + 1)) p.spawn.x p.spawn.y;
+  Printf.printf "%sColor\n" (indent (level + 1));
+  Printf.printf "%sred:\n" (indent (level + 2));
+  print_expr (level + 3) p.color.red;
+  Printf.printf "%sgreen:\n" (indent (level + 2));
+  print_expr (level + 3) p.color.green;
+  Printf.printf "%sblue:\n" (indent (level + 2));
+  print_expr (level + 3) p.color.blue;
+  Printf.printf "%sSpawn\n" (indent (level + 1));
+  Printf.printf "%sx:\n" (indent (level + 2));
+  print_expr (level + 3) p.spawn.x;
+  Printf.printf "%sy:\n" (indent (level + 2));
+  print_expr (level + 3) p.spawn.y;
   List.iter (print_keybind (level + 1)) p.keybinds
 
 let string_of_tile_kind = function

@@ -19,9 +19,9 @@ open Arena
 %left PLUS MINUS
 %left MULTIPLY DIVIDE
 
-%token ARENA SPAWN PLAYERS COLOR
+%token ARENA ARENA_FILE SPAWN PLAYERS COLOR
 %token KEYS JUMP LEFT RIGHT
-%token ARENA_FILE
+%token ASSETS BACKGROUND SOLID_TILE WIN_TILE LOSE_TILE
 
 %start <Ast.program> program
 
@@ -34,12 +34,13 @@ program:
   players_block_opt
   arena_block_opt
   arena_file_block_opt
+  assets_block_opt
   top_keybinds_opt
   separators
   EOF
     {
       let constants = $2 @ $3 in
-      { constants; players = $4; arena = $5; arena_file = $6; stmts = $7 }
+      { constants; players = $4; arena = $5; arena_file = $6; assets = $7; stmts = $8 }
     }
 ;
 
@@ -131,13 +132,19 @@ player_fields:
   | keys_field spawn_field color_field { ($3, $2, $1) }
 ;
 
+(* int_expr accepts either a literal int or a constant reference *)
+int_expr:
+  | INT   { Econst (SCint $1) }
+  | IDENT { Evar { loc = ($startpos, $endpos); id = $1; pos = $startpos } }
+;
+
 color_field:
-  | COLOR COLON INT INT INT NEWLINE
+  | COLOR COLON int_expr int_expr int_expr NEWLINE
     { { red = $3; green = $4; blue = $5 } }
 ;
 
 spawn_field:
-  | SPAWN COLON INT INT NEWLINE
+  | SPAWN COLON int_expr int_expr NEWLINE
     { { x = $3; y = $4 } }
 ;
 
@@ -182,11 +189,6 @@ arena_block_opt:
     { Some (make_arena $3) }
 ;
 
-arena_file_block_opt:
-  | /* empty */                        { None }
-  | ARENA_FILE header_colon STRING NEWLINE separators { Some $3 }
-;
-
 arena_literal:
   | LBRACKET arena_rows_opt RBRACKET { $2 }
 ;
@@ -218,6 +220,33 @@ int_list:
 maybe_comma:
   | /* empty */ { () }
   | COMMA { () }
+;
+
+arena_file_block_opt:
+  | /* empty */                                      { None }
+  | ARENA_FILE header_colon STRING NEWLINE separators { Some $3 }
+;
+
+(* assets block: optional, each field overrides one asset path *)
+assets_block_opt:
+  | /* empty */ { empty_assets }
+  | ASSETS header_colon NEWLINE INDENT asset_lines DEDENT separators { $5 }
+;
+
+asset_lines:
+  | /* empty */
+    { empty_assets }
+  | BACKGROUND COLON STRING NEWLINE asset_lines
+    { { $5 with background = Some $3 } }
+  | SOLID_TILE COLON STRING NEWLINE asset_lines
+    { { $5 with solid = Some $3 } }
+  | WIN_TILE COLON STRING NEWLINE asset_lines
+    { { $5 with win = Some $3 } }
+  | LOSE_TILE COLON STRING NEWLINE asset_lines
+    { { $5 with lose = Some $3 } }
+  | IDENT COLON STRING NEWLINE asset_lines
+    { { $5 with player_assets = $5.player_assets @ [$3] } }
+  | NEWLINE asset_lines { $2 }
 ;
 
 top_keybinds_opt:

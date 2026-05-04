@@ -31,9 +31,11 @@ and stmt = Keybinds of keybind list
 and const_decl = { name : string; value : const_value; pos : Lexing.position }
 
 type tile_kind = Tsolid | Twin | Tlose | Tempty
-type position = { x : int; y : int }
+
+(* color and spawn now hold expressions so constants can be referenced *)
+type position = { x : expr; y : expr }
 type arena = { width : int; height : int; tiles : tile_kind array array }
-type rgb_color = { red : int; green : int; blue : int }
+type rgb_color = { red : expr; green : expr; blue : expr }
 
 type player = {
   name : string;
@@ -42,10 +44,31 @@ type player = {
   keybinds : keybind list;
 }
 
+(* asset paths for sprites and background, all optional *)
+type assets = {
+  background : string option;
+  solid : string option;
+  win : string option;
+  lose : string option;
+  player_assets : string list;
+      (* indexed by player order, player_assets[0] = player1 *)
+}
+
+(* default assets record used when no assets block is present *)
+let empty_assets =
+  {
+    background = None;
+    solid = None;
+    win = None;
+    lose = None;
+    player_assets = [];
+  }
+
 type program = {
   constants : const_decl list;
   arena : arena option;
   arena_file : string option;
+  assets : assets;
   players : player list;
   stmts : stmt list;
 }

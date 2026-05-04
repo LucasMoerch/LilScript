@@ -41,9 +41,10 @@ let () =
     else begin
       let ast = Parser.program Lexer.next_token lexbuf in
       if !dump_ast then Ast_printer.dump ast;
-
-      Diagnostics.check_duplicates ast.Ast.constants;
-
+      (* type check first -- catches bad constant expressions and player field types *)
+      Typecheck.check ast;
+      (* semantic checks -- arena present, players present, duplicates, key conflicts *)
+      Diagnostics.check_all ast;
       (* resolve arena_file into an arena if no inline arena was given *)
       let ast =
         match ast.Ast.arena_file with
@@ -56,6 +57,10 @@ let () =
             let arena = Arena_reader.read_arena path in
             { ast with Ast.arena = Some arena }
       in
+      (* spawn bounds check needs the resolved arena so it runs here *)
+      (match ast.Ast.arena with
+      | Some arena -> Diagnostics.check_spawn_bounds ast.Ast.players arena
+      | None -> ());
 
       (* generate python output *)
       let python_src = Codegen.generate ast in
@@ -89,6 +94,9 @@ let () =
       List.iter (Eval.print_evaluated env) ast.Ast.constants
     end
   with
+  | Typecheck.Type_error msg ->
+      Printf.eprintf "Type error: %s\n%!" msg;
+      exit 1
   | Lexer_utils.Lexing_error (msg, pos) ->
       Printf.eprintf "%s: %s\n%!" (Diagnostics.pos_str pos) msg
   | Parser.Error ->
