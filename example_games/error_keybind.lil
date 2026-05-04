@@ -1,0 +1,9 @@
+players:
+  p1:
+    color: 255 0 0
+    spawn: 2 2
+    keys:
+      LEFT: "left"
+      RIGHT: "right"
+
+arena_file: "maps/level1.txt"

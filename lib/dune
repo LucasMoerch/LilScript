@@ -9,7 +9,8 @@
   arena_reader
   parser
   ast_printer
-  codegen))
+  codegen
+  typecheck))
 
 (ocamllex lexer)
 

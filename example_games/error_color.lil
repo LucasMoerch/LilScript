@@ -1,0 +1,10 @@
+players:
+  p1:
+    color: 300 0 0
+    spawn: 2 2
+    keys:
+      JUMP: "up"
+      LEFT: "left"
+      RIGHT: "right"
+
+arena_file: "maps/level1.txt"

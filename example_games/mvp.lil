@@ -16,10 +16,18 @@ players:
       RIGHT: "right"
   p2:
     color: 80 255 80
-    spawn: 3 3
+    spawn: 3 3000
     keys:
       JUMP: "w"
       LEFT: "a"
       RIGHT: "d"
 
 arena_file: "maps/level1.txt"
+
+assets:
+  background: "pygame/assets/background.png"
+  solid: "pygame/assets/solid.png"
+  win: "pygame/assets/win.png"
+  lose: "pygame/assets/lose.png"
+  player1: "pygame/assets/player1.png"
+  player2: "pygame/assets/player2.png"
