@@ -19,14 +19,7 @@ and expr =
   | Ebinop of binop * expr * expr
   | Elist of expr list
 
-and const_value =
-  | Cint of int
-  | Cstring of string
-  | Cbool of bool
-  | Cfloat of float
-  | Cexpr of expr
-  | Cempty
-
+and const_value = Cexpr of expr | Cempty
 and stmt = Keybinds of keybind list
 and const_decl = { name : string; value : const_value; pos : Lexing.position }
 

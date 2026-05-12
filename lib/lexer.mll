@@ -36,16 +36,13 @@ and next_token_inner = parse
       ) else
         next_token lexbuf
     }
-
   | "//" [^ '\n']* { next_token lexbuf }   (* line comment *)
-
   (* newlines inside brackets are ignored to allow multiline lists *)
   | "\r\n" | '\n' | '\r' {
       bol := true;
       Lexing.new_line lexbuf;
       if !bracket_depth > 0 then next_token lexbuf else NEWLINE
     }
-
   | ":"  { maybe_bol_token COLON    lexbuf }
   | "+"  { maybe_bol_token PLUS     lexbuf }
   | "-"  { maybe_bol_token MINUS    lexbuf }
@@ -53,7 +50,6 @@ and next_token_inner = parse
   | "/"  { maybe_bol_token DIVIDE   lexbuf }
   | "("  { maybe_bol_token LPAREN   lexbuf }
   | ")"  { maybe_bol_token RPAREN   lexbuf }
-
   (* brackets suppress newline tokens inside them *)
   | "[" {
       if !bol && !bracket_depth = 0 then emit_indent_tokens 0 lexbuf;
@@ -63,7 +59,6 @@ and next_token_inner = parse
     }
   | "]" { bol := false; decr bracket_depth; RBRACKET }
   | "," { bol := false; COMMA }
-
   | '"' {
       if !bol && !bracket_depth = 0 then (
         emit_indent_tokens 0 lexbuf;
@@ -76,12 +71,13 @@ and next_token_inner = parse
         string_literal (Buffer.create 16) lexbuf
       )
     }
-
   (* float must come before int so "1.0" does not match digit+ first *)
   | float as f  { maybe_bol_token (FLOAT (float_of_string f)) lexbuf }
   | digit+ as n { maybe_bol_token (INT   (int_of_string  n)) lexbuf }
+  (* bool literals must come before ident so they win the priority tie on equal length *)
+  | "true"      { maybe_bol_token (BOOL true)  lexbuf }
+  | "false"     { maybe_bol_token (BOOL false) lexbuf }
   | ident  as s { maybe_bol_token (keyword_or_ident s)        lexbuf }
-
   (* flush remaining DEDENTs before EOF *)
   | eof {
       while Stack.top indent_stack > 0 do
@@ -90,12 +86,10 @@ and next_token_inner = parse
       done;
       if Queue.is_empty pending then EOF else Queue.take pending
     }
-
   | _ {
       raise (Lexing_error
         ("Unexpected character: " ^ Lexing.lexeme lexbuf,
          Lexing.lexeme_start_p lexbuf))
     }
-
 {
 }
