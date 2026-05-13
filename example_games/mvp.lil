@@ -5,6 +5,8 @@ constants:
   JUMP_HEIGHT: 14
   SPEED: 4
   TICK_SPEED: 60
+  BLOCK_ERASE_MODE: true
+  ERASE_TIME: 3000
 
 players:
   p1:
@@ -16,7 +18,7 @@ players:
       RIGHT: "right"
   p2:
     color: 80 255 80
-    spawn: 3 3000
+    spawn: 3 3
     keys:
       JUMP: "w"
       LEFT: "a"

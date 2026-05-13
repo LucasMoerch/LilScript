@@ -168,6 +168,10 @@ This writes `pygame/mygame.py`.
 pygame python3 pygame/mygame.py
 ```
 
+```bash
+PYTHONPATH=pygame python3 pygame/mygame.py
+```
+
 ---
 
 ## Compiler Flags

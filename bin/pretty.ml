@@ -19,10 +19,6 @@ let rec string_of_expr = function
   | Elist es -> "[" ^ String.concat ", " (List.map string_of_expr es) ^ "]"
 
 let string_of_const_value = function
-  | Cint i -> string_of_int i
-  | Cstring s -> Printf.sprintf "\"%s\"" s
-  | Cbool b -> string_of_bool b
-  | Cfloat f -> string_of_float f
   | Cexpr e -> string_of_expr e
   | Cempty -> "<no value>"
 
@@ -75,5 +71,6 @@ let string_of_token = function
   | INT i -> "INT(" ^ string_of_int i ^ ")"
   | STRING s -> "STRING(" ^ s ^ ")"
   | FLOAT f -> "FLOAT(" ^ string_of_float f ^ ")"
+  | BOOL b -> "BOOL(" ^ string_of_bool b ^ ")"
 
 let string_of_player p = Printf.sprintf "player %s \n" p.Ast.name
