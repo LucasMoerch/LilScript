@@ -9,12 +9,60 @@ import settings as settings_module
 pygame.init()
 |}
 
-(* extract a float from a const_value, falling back to a default string *)
-let const_value_to_str v default =
-  match v with
-  | Cfloat f -> Printf.sprintf "%g" f
-  | Cint i -> string_of_int i
-  | _ -> default
+(* tagged value type returned by compile-time evaluation *)
+type value = VInt of int | VFloat of float | VBool of bool | VString of string
+
+(* compute the value of an expression at compile time, resolving constant references *)
+let rec eval_const (consts : const_decl list) (e : expr) : value option =
+  match e with
+  | Econst (SCint i) -> Some (VInt i)
+  | Econst (SCfloat f) -> Some (VFloat f)
+  | Econst (SCbool b) -> Some (VBool b)
+  | Econst (SCstring s) -> Some (VString s)
+  | Evar id -> (
+      match List.find_opt (fun (c : const_decl) -> c.name = id.id) consts with
+      | Some { value = Cexpr inner; _ } -> eval_const consts inner
+      | _ -> None)
+  | Ebinop (op, e1, e2) -> (
+      let v1 = eval_const consts e1 in
+      let v2 = eval_const consts e2 in
+      match (v1, v2) with
+      | Some (VInt a), Some (VInt b) -> (
+          match op with
+          | Badd -> Some (VInt (a + b))
+          | Bmin -> Some (VInt (a - b))
+          | Bmul -> Some (VInt (a * b))
+          | Bdiv when b <> 0 -> Some (VInt (a / b))
+          | _ -> None)
+      | Some (VFloat a), Some (VFloat b) -> (
+          match op with
+          | Badd -> Some (VFloat (a +. b))
+          | Bmin -> Some (VFloat (a -. b))
+          | Bmul -> Some (VFloat (a *. b))
+          | Bdiv -> Some (VFloat (a /. b)))
+      | Some (VInt a), Some (VFloat b) -> (
+          let af = float_of_int a in
+          match op with
+          | Badd -> Some (VFloat (af +. b))
+          | Bmin -> Some (VFloat (af -. b))
+          | Bmul -> Some (VFloat (af *. b))
+          | Bdiv -> Some (VFloat (af /. b)))
+      | Some (VFloat a), Some (VInt b) -> (
+          let bf = float_of_int b in
+          match op with
+          | Badd -> Some (VFloat (a +. bf))
+          | Bmin -> Some (VFloat (a -. bf))
+          | Bmul -> Some (VFloat (a *. bf))
+          | Bdiv -> Some (VFloat (a /. bf)))
+      | _ -> None)
+  | Elist _ -> None
+
+(* format a value as the python literal that should appear in generated code *)
+let value_to_python_str = function
+  | VInt i -> string_of_int i
+  | VFloat f -> Printf.sprintf "%g" f
+  | VBool b -> if b then "True" else "False"
+  | VString s -> "\"" ^ s ^ "\""
 
 (* look up a constant by name and convert its value to a string *)
 let lookup_const name default consts =
@@ -24,8 +72,11 @@ let lookup_const name default consts =
       (fun (c : const_decl) -> String.lowercase_ascii c.name = lower)
       consts
   with
-  | Some c -> const_value_to_str c.value default
-  | None -> default
+  | Some { value = Cexpr e; _ } -> (
+      match eval_const consts e with
+      | Some v -> value_to_python_str v
+      | None -> default)
+  | _ -> default
 
 (* convert tile_kind to the integer your Python runtime expects *)
 let tile_kind_to_int = function
@@ -40,13 +91,9 @@ let opt_path = function Some s -> Printf.sprintf "\"%s\"" s | None -> "None"
 (* evaluate a color or spawn expression to an int for codegen.
    by the time we get here typecheck has already verified the type *)
 let eval_to_int (consts : const_decl list) (e : expr) : int =
-  match e with
-  | Econst (SCint i) -> i
-  | Evar id -> (
-      match List.find_opt (fun (c : const_decl) -> c.name = id.id) consts with
-      | Some { value = Cint i; _ } -> i
-      | _ -> failwith ("codegen: cannot resolve '" ^ id.id ^ "' to int"))
-  | _ -> failwith "codegen: color/spawn must be int expressions"
+  match eval_const consts e with
+  | Some (VInt i) -> i
+  | _ -> failwith "codegen: color/spawn must resolve to int"
 
 (* emit the Settings() call from arena + constants + assets *)
 let emit_settings buf (arena : arena) (consts : const_decl list)

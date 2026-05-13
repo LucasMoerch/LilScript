@@ -12,6 +12,7 @@ open Arena
 %token <int> INT
 %token <string> STRING
 %token <float> FLOAT
+%token <bool> BOOL
 %token EOF
 
 %token PLUS MINUS MULTIPLY DIVIDE
@@ -66,12 +67,6 @@ root_constants:
 ;
 
 root_constant:
-  | IDENT COLON INT NEWLINE
-    { { name = $1; value = Cint $3; pos = $startpos } }
-  | IDENT COLON FLOAT NEWLINE
-    { { name = $1; value = Cfloat $3; pos = $startpos } }
-  | IDENT COLON STRING NEWLINE
-    { { name = $1; value = Cstring $3; pos = $startpos } }
   | IDENT COLON expr NEWLINE
     { { name = $1; value = Cexpr $3; pos = $startpos } }
   | IDENT COLON NEWLINE
@@ -91,12 +86,6 @@ const_lines:
 ;
 
 const_line:
-  | IDENT COLON INT NEWLINE
-    { { name = $1; value = Cint $3; pos = $startpos } }
-  | IDENT COLON FLOAT NEWLINE
-    { { name = $1; value = Cfloat $3; pos = $startpos } }
-  | IDENT COLON STRING NEWLINE
-    { { name = $1; value = Cstring $3; pos = $startpos } }
   | IDENT COLON expr NEWLINE
     { { name = $1; value = Cexpr $3; pos = $startpos } }
   | IDENT COLON NEWLINE
@@ -267,6 +256,8 @@ top_keybind_stmt:
 expr:
   | INT { Econst (SCint $1) }
   | FLOAT { Econst (SCfloat $1) }
+  | BOOL { Econst (SCbool $1) }
+  | STRING { Econst (SCstring $1) }
   | ident_tok { Evar $1 }
   | expr PLUS expr { Ebinop (Badd, $1, $3) }
   | expr MINUS expr { Ebinop (Bmin, $1, $3) }

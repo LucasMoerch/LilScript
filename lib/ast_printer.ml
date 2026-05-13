@@ -29,10 +29,6 @@ let rec print_expr level expr =
 let print_const level (c : const_decl) =
   Printf.printf "%sConstant %s\n" (indent level) c.name;
   match c.value with
-  | Cint i -> Printf.printf "%sCint %d\n" (indent (level + 1)) i
-  | Cfloat f -> Printf.printf "%sCfloat %f\n" (indent (level + 1)) f
-  | Cstring s -> Printf.printf "%sCstring \"%s\"\n" (indent (level + 1)) s
-  | Cbool b -> Printf.printf "%sCbool %b\n" (indent (level + 1)) b
   | Cexpr e ->
       Printf.printf "%sCexpr\n" (indent (level + 1));
       print_expr (level + 2) e
