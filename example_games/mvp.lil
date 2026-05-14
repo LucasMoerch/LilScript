@@ -1,5 +1,3 @@
-tile_size: 32
-
 constants:
   GRAVITY: 1.2
   JUMP_HEIGHT: 14
