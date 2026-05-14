@@ -168,11 +168,57 @@ This writes `pygame/mygame.py`.
 pygame python3 pygame/mygame.py
 ```
 
+If using venv:
 ```bash
 PYTHONPATH=pygame python3 pygame/mygame.py
 ```
 
 ---
+
+## Shell Shortcuts
+
+To avoid typing `dune exec -- lilscriptc` every time, add the following helpers to `~/.bashrc`. You can paste the whole block at once:
+
+```bash
+cat >> ~/.bashrc << 'EOF'
+
+# LilScript shortcuts
+alias lilc='dune exec -- lilscriptc'
+
+lilrun() {
+  if [ -f .venv/bin/activate ]; then
+    source .venv/bin/activate
+  fi
+  dune exec -- lilscriptc "$1" && PYTHONPATH=pygame python3 "pygame/$(basename "${1%.lil}").py"
+}
+
+arena() {
+  if [ -z "$1" ]; then
+    echo "usage: arena <map-name> [width] [height]"
+    return 1
+  fi
+  local out="maps/$1.txt"
+  if [ -f "$out" ]; then
+    dune exec -- arena_editor --output "$out"
+  else
+    dune exec -- arena_editor --output "$out" --width "${2:-20}" --height "${3:-15}"
+  fi
+}
+EOF
+
+source ~/.bashrc
+```
+
+Once set up:
+
+```bash
+lilc example_games/mvp.lil           # compile only
+lilrun example_games/mvp.lil         # compile and run
+arena level1                         # open or create maps/level1.txt
+arena level1 30 20                   # create with custom dimensions
+```
+
+All three commands must be run from the repo root. `lilrun` activates `.venv` automatically if one exists.
 
 ## Compiler Flags
 
