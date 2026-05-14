@@ -1,3 +1,12 @@
 (test
  (name test_lilscript)
- (libraries LilScript ounit2))
+ (libraries LilScript ounit2)
+ (modules
+  test_lilscript
+  test_lexer
+  test_typecheck
+  test_diagnostics
+  test_pipeline
+  test_codegen
+  test_acceptance
+  test_helpers))
