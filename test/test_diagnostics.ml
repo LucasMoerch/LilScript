@@ -64,7 +64,7 @@ arena: [[1]]
   assert_raises_or_exits "color via constant > 255" (fun () ->
       parse_and_check src)
 
-let test_magic_constant_wrong_type _ =
+let test_recognised_constant_wrong_type _ =
   let src =
     {|
 constants:
@@ -89,5 +89,6 @@ let suite =
          "missing_jump_key" >:: test_duplicate_keybind_missing;
          "color_out_of_range" >:: test_color_out_of_range;
          "color_through_constant" >:: test_color_through_constant;
-         "magic_constant_wrong_type" >:: test_magic_constant_wrong_type;
+         "recognised_constant_wrong_type"
+         >:: test_recognised_constant_wrong_type;
        ]

@@ -14,6 +14,7 @@ rule string_literal buf = parse
   | '\\' '"'    { Buffer.add_char buf '"';  string_literal buf lexbuf }
   | '\\' '\\'   { Buffer.add_char buf '\\'; string_literal buf lexbuf }
   | '\\' 'n'    { Buffer.add_char buf '\n'; string_literal buf lexbuf }
+  | '\n' { raise (Lexing_error ("Unterminated string", Lexing.lexeme_start_p lexbuf)) }
   | eof         { raise (Lexing_error ("Unterminated string", Lexing.lexeme_start_p lexbuf)) }
   | _ as c      { Buffer.add_char buf c;    string_literal buf lexbuf }
 

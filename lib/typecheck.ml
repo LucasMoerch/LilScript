@@ -124,9 +124,9 @@ let check_const env (c : const_decl) =
       Printf.eprintf "%s: warning: constant '%s' has no value\n%!"
         (pos_str c.pos) c.name
 
-(* known magic constant names that the codegen reads, with their expected types.
+(* known recognised constant names that the codegen reads, with their expected types.
    these names are not reserved but when present they must have the right type *)
-let magic_constant_types =
+let recognised_constant_types =
   [
     ("GRAVITY", [ TInt; TFloat ]);
     ("JUMP_HEIGHT", [ TInt; TFloat ]);
@@ -137,8 +137,8 @@ let magic_constant_types =
     ("BLOCK_ERASE_MODE", [ TBool ]);
   ]
 
-(* verify any magic constants present have the expected type *)
-let check_magic_constants env =
+(* verify any recognised constants present have the expected type *)
+let check_recognised_constants env =
   List.iter
     (fun (name, allowed) ->
       (* lexer lowercases all identifiers so the env key is the lowercase form *)
@@ -150,10 +150,10 @@ let check_magic_constants env =
           in
           raise
             (Type_error
-               (Printf.sprintf "magic constant '%s' must be %s but is %s" name
-                  expected (string_of_type t)))
+               (Printf.sprintf "recognised constant '%s' must be %s but is %s"
+                  name expected (string_of_type t)))
       | _ -> ())
-    magic_constant_types
+    recognised_constant_types
 
 (* check all three required keybinds are present for a player *)
 let check_keybinds (p : player) =
@@ -176,8 +176,8 @@ let check (prog : program) =
   let env = build_env prog.constants in
   (* check constants in order so expressions can reference earlier ones *)
   List.iter (check_const env) prog.constants;
-  (* validate that magic constants have their expected types *)
-  check_magic_constants env;
+  (* validate that recognised constants have their expected types *)
+  check_recognised_constants env;
   (* check each player's color, spawn, and keybinds *)
   List.iter
     (fun (p : player) ->
