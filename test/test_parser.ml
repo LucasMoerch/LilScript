@@ -3,7 +3,8 @@ open LilScript
 open Test_helpers
 
 let test_single_constant _ =
-  let src = {|
+  let src =
+    {|
 GRAVITY: 1.5
 players:
   p1:
@@ -14,14 +15,16 @@ players:
       LEFT: "left"
       RIGHT: "right"
 arena: [[1]]
-|} in
+|}
+  in
   let ast = parse_string src in
   assert_equal 1 (List.length ast.constants);
   let c = List.hd ast.constants in
   assert_equal "gravity" c.name
 
 let test_constants_block _ =
-  let src = {|
+  let src =
+    {|
 constants:
   GRAVITY: 1.5
   SPEED: 4
@@ -34,13 +37,15 @@ players:
       LEFT: "left"
       RIGHT: "right"
 arena: [[1]]
-|} in
+|}
+  in
   let ast = parse_string src in
   assert_equal 2 (List.length ast.constants)
 
 let test_arithmetic_precedence _ =
   (* 1 + 2 * 3 should parse as 1 + (2 * 3), not (1 + 2) * 3 *)
-  let src = {|
+  let src =
+    {|
 X: 1 + 2 * 3
 players:
   p1:
@@ -51,7 +56,8 @@ players:
       LEFT: "left"
       RIGHT: "right"
 arena: [[1]]
-|} in
+|}
+  in
   let ast = parse_string src in
   let c = List.hd ast.constants in
   match c.value with
@@ -59,7 +65,8 @@ arena: [[1]]
   | _ -> assert_failure "expected 1 + (2 * 3) shape"
 
 let test_two_players _ =
-  let src = {|
+  let src =
+    {|
 players:
   p1:
     color: 0 0 0
@@ -76,12 +83,14 @@ players:
       LEFT: "a"
       RIGHT: "d"
 arena: [[1]]
-|} in
+|}
+  in
   let ast = parse_string src in
   assert_equal 2 (List.length ast.players)
 
 let test_arena_inline _ =
-  let src = {|
+  let src =
+    {|
 players:
   p1:
     color: 0 0 0
@@ -91,7 +100,8 @@ players:
       LEFT: "left"
       RIGHT: "right"
 arena: [[1,0,1],[0,1,0]]
-|} in
+|}
+  in
   let ast = parse_string src in
   match ast.arena with
   | Some a ->
@@ -100,7 +110,8 @@ arena: [[1,0,1],[0,1,0]]
   | None -> assert_failure "expected inline arena"
 
 let test_arena_file_reference _ =
-  let src = {|
+  let src =
+    {|
 players:
   p1:
     color: 0 0 0
@@ -110,16 +121,18 @@ players:
       LEFT: "left"
       RIGHT: "right"
 arena_file: "maps/level1.txt"
-|} in
+|}
+  in
   let ast = parse_string src in
   assert_equal (Some "maps/level1.txt") ast.arena_file
 
 let suite =
-  "parser" >::: [
-    "single_constant" >:: test_single_constant;
-    "constants_block" >:: test_constants_block;
-    "arithmetic_precedence" >:: test_arithmetic_precedence;
-    "two_players" >:: test_two_players;
-    "arena_inline" >:: test_arena_inline;
-    "arena_file_reference" >:: test_arena_file_reference;
-  ]
+  "parser"
+  >::: [
+         "single_constant" >:: test_single_constant;
+         "constants_block" >:: test_constants_block;
+         "arithmetic_precedence" >:: test_arithmetic_precedence;
+         "two_players" >:: test_two_players;
+         "arena_inline" >:: test_arena_inline;
+         "arena_file_reference" >:: test_arena_file_reference;
+       ]
