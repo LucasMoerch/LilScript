@@ -32,6 +32,7 @@ mapList = [
 ]
 player1 = utils.create_player("up","left","right",[160,32],(255,80,80),game_settings,1)
 player2 = utils.create_player("w","a","d",[160,32],(80,255,80),game_settings,2)
+player3 = utils.create_player("i","j","l",[160,32],(80,255,80),game_settings,3)
 
 blockList = utils.create_level(game_settings, mapList)
 screen = pygame.display.set_mode((
@@ -56,10 +57,12 @@ while running:
         b.update(game_settings)
     player1.draw(screen)
     player2.draw(screen)
+    player3.draw(screen)
     pygame.display.flip()
     keys = pygame.key.get_pressed()
     player1.handle_input(keys, blockList)
     player2.handle_input(keys, blockList)
+    player3.handle_input(keys, blockList)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False

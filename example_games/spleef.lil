@@ -1,29 +1,28 @@
 constants:
-  GRAVITY: 1.2
-  JUMP_HEIGHT: 14
+  GRAVITY: 0.4
+  JUMP_HEIGHT: 10
   SPEED: 4
   TICK_SPEED: 60
-  BLOCK_ERASE_MODE: false
-  // math1: 4 * 2 + 2
-  // math2: 4 * (2 + 2)
+  BLOCK_ERASE_MODE: true
+  ERASE_TIME: 2000 // ms
 
 players:
   p1:
     color: 255 80 80
-    spawn: 6 2
+    spawn: 13 1
     keys:
       JUMP: "up"
       LEFT: "left"
       RIGHT: "right"
   p2:
     color: 80 255 80
-    spawn: 6 3
+    spawn: 51 1
     keys:
       JUMP: "w"
       LEFT: "a"
       RIGHT: "d"
 
-arena_file: "maps/level2.txt"
+arena_file: "maps/spleef.txt"
 
 assets:
   background: "pygame/assets/background.png"
