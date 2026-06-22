@@ -1,0 +1,16 @@
+constants:
+  GRAVITY: 1.8
+  JUMP_HEIGHT: 16
+  SPEED: 5
+  TICK_SPEED: 60
+
+players:
+  p1:
+    color: 255 80 80
+    spawn: 1 1
+    keys:
+      JUMP: "up"
+      LEFT: "left"
+      RIGHT: "right"
+
+arena_file: "maps/TobiGame.txt"
