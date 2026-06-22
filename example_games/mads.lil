@@ -1,0 +1,34 @@
+constants:
+  GRAVITY: 0.5
+  JUMP_HEIGHT: 8
+  SPEED: 5
+  TICK_SPEED: 60
+  BLOCK_ERASE_MODE: false
+  ERASE_TIME: 3000
+
+players:
+  p1:
+    color: 255 80 80
+    spawn: 3 23
+    keys:
+      JUMP: "up"
+      LEFT: "left"
+      RIGHT: "right"
+  p2:
+    color: 80 255 80
+    spawn: 2 23
+    keys:
+      JUMP: "w"
+      LEFT: "a"
+      RIGHT: "d"
+
+arena_file: "maps/level3.txt"
+
+assets:
+  background: "pygame/assets/background.png"
+  solid: "pygame/assets/solid.png"
+  win: "pygame/assets/win.png"
+  lose: "pygame/assets/lose.png"
+  player1: "pygame/assets/player1.png"
+  player2: "pygame/assets/player2.png"
+  playew: "pygame/assets/player6.png"
